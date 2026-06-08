@@ -1,6 +1,7 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '../config/env';
 import { logger } from './logger';
+import { captureException } from './sentry';
 
 let cachedTransporter: Transporter | null = null;
 let resolved = false;
@@ -43,14 +44,21 @@ async function sendEmail(params: {
     return;
   }
 
-  await transporter.sendMail({
-    from: env.EMAIL_FROM,
-    to: params.to,
-    subject: params.subject,
-    html: params.html,
-    text: params.text,
-  });
-  logger.info(`📧 Email sent to ${params.to}: "${params.subject}"`);
+  // Email is a side effect — never let a provider hiccup fail the calling
+  // operation (e.g. registration). Log failures; the user can request a resend.
+  try {
+    await transporter.sendMail({
+      from: env.EMAIL_FROM,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+      text: params.text,
+    });
+    logger.info(`📧 Email sent to ${params.to}: "${params.subject}"`);
+  } catch (error) {
+    logger.error(`📧 Email to ${params.to} failed ("${params.subject}"):`, error);
+    captureException(error);
+  }
 }
 
 // ─────────────────────────── Branded template ────────────────────────────

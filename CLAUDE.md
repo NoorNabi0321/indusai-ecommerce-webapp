@@ -333,12 +333,21 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 2 — Database Schema & Authentication
-CURRENT SUBPHASE: 2.3 — Auth API Endpoints
+CURRENT SUBPHASE: 2.4 — Frontend Auth Stores & API Layer
 
 Phase 2 Progress:
   2.1 Prisma Schema & DB Setup           [x] Done (Neon migrated + seeded)
   2.2 Auth Service & Utilities           [x] Done (Resend email; console fallback)
-  2.3 Auth API Endpoints                 [ ] Next
+  2.3 Auth API Endpoints                 [x] Done (8 endpoints, e2e verified)
+  2.4 Frontend Auth Stores & API Layer   [ ] Next
+  2.5 Auth UI Pages                      [ ] (flip PREVIEW_BYPASS off here)
+
+Notes (2.3):
+  - Resend SANDBOX only delivers to account owner (alibift000006@gmail.com).
+    Verify a domain at resend.com/domains for prod to email any recipient.
+  - Refresh token in httpOnly cookie 'indusai_rt' (path /api/auth); access
+    token returned in body for the frontend to hold in memory.
+  - Email sends are resilient (log on failure, never fail the auth operation).
   2.4 Frontend Auth Stores & API Layer   [ ] Not Started
   2.5 Auth UI Pages                      [ ] Not Started (flip PREVIEW_BYPASS off)
 
