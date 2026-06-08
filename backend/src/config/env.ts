@@ -41,7 +41,12 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: optionalString,
   CLOUDINARY_API_SECRET: optionalString,
 
-  // ── SendGrid (Phase 2 / 11) ──
+  // ── Email: Resend / SMTP (Phase 2 / 11) ──
+  RESEND_API_KEY: optionalString,
+  EMAIL_FROM: z.preprocess(
+    emptyToUndefined,
+    z.string().default('IndusAI <onboarding@resend.dev>'),
+  ),
   SENDGRID_API_KEY: optionalString,
   SENDGRID_FROM_EMAIL: optionalString,
 

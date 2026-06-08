@@ -333,12 +333,12 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 2 — Database Schema & Authentication
-CURRENT SUBPHASE: 2.2 — Auth Service & Utilities
+CURRENT SUBPHASE: 2.3 — Auth API Endpoints
 
 Phase 2 Progress:
   2.1 Prisma Schema & DB Setup           [x] Done (Neon migrated + seeded)
-  2.2 Auth Service & Utilities           [ ] Next  (needs email provider)
-  2.3 Auth API Endpoints                 [ ] Not Started
+  2.2 Auth Service & Utilities           [x] Done (Resend email; console fallback)
+  2.3 Auth API Endpoints                 [ ] Next
   2.4 Frontend Auth Stores & API Layer   [ ] Not Started
   2.5 Auth UI Pages                      [ ] Not Started (flip PREVIEW_BYPASS off)
 
