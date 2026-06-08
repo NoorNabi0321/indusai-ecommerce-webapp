@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * IndusAI Design Tokens.
+ * The app is dark-first: `class="dark"` is set on <html> by default.
+ * Shadcn primitives read the HSL semantic vars below.
+ */
+@layer base {
+  :root,
+  .dark {
+    /* ─── Shadcn semantic tokens (HSL channels, space-separated) ─── */
+    --background: 240 7% 5%; /* #0D0D0F */
+    --foreground: 0 0% 100%;
+
+    --card: 240 3% 9%; /* #161618 */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 240 5% 12%; /* #1F1F22 */
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 40 76% 56%; /* gold #E4A93A */
+    --primary-foreground: 240 7% 5%;
+
+    --secondary: 240 5% 12%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 240 4% 16%;
+    --muted-foreground: 40 2% 69%; /* #B0AFAC */
+
+    --accent: 240 5% 16%; /* #2A2A2E hover */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 6 78% 57%; /* #E74C3C */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 40 76% 56%; /* gold focus ring */
+
+    --radius: 0.875rem; /* 14px — matches --radius-lg */
+
+    /* ─── Glassmorphism ─── */
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.08);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-ui;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  /* Tabular numbers for prices, stats, counters */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Custom dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: theme('colors.bg.base');
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.bg.overlay');
+    border-radius: 9999px;
+    border: 2px solid theme('colors.bg.base');
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.gold.dim');
+  }
+}
+
+@layer components {
+  /* Frosted glass surface — used by navbar, drawers, modals */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Shimmer skeleton loader */
+  .skeleton {
+    @apply relative overflow-hidden bg-bg-elevated;
+  }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full;
+    content: '';
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Gradient text — gold brand accent */
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-glow via-gold-base to-gold-dim bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  /* Respect reduced-motion preference globally */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

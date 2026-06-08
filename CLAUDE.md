@@ -333,12 +333,12 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 1 — Project Foundation
-CURRENT SUBPHASE: 1.2 — Frontend Scaffold & Design System
+CURRENT SUBPHASE: 1.3 — Backend Scaffold & Configuration
 
 Subphase 1 Progress:
   1.1 Repository & Monorepo Setup        [x] Done
-  1.2 Frontend Scaffold & Design System  [ ] Next
-  1.3 Backend Scaffold & Configuration   [ ] Not Started
+  1.2 Frontend Scaffold & Design System  [x] Done
+  1.3 Backend Scaffold & Configuration   [ ] Next
   1.4 Shared Layout & Routing Shell      [ ] Not Started
 
 Phase Status:
