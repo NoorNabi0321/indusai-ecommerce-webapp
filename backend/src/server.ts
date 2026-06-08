@@ -3,14 +3,25 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './utils/logger';
 import { initSentry, captureException } from './utils/sentry';
+import { connectDatabase, disconnectDatabase } from './config/database';
 
 initSentry();
 
 const app = createApp();
+let server: Server;
 
-const server: Server = app.listen(env.PORT, () => {
-  logger.info(`🚀 IndusAI API running at http://localhost:${env.PORT}/api  [${env.NODE_ENV}]`);
-  logger.info(`   Health check: http://localhost:${env.PORT}/api/health`);
+async function start(): Promise<void> {
+  await connectDatabase();
+  server = app.listen(env.PORT, () => {
+    logger.info(`🚀 IndusAI API running at http://localhost:${env.PORT}/api  [${env.NODE_ENV}]`);
+    logger.info(`   Health check: http://localhost:${env.PORT}/api/health`);
+  });
+}
+
+void start().catch((error) => {
+  logger.error('Failed to start server:', error);
+  captureException(error);
+  process.exit(1);
 });
 
 // ── Process-level safety nets ──
@@ -29,9 +40,11 @@ process.on('uncaughtException', (error) => {
 // ── Graceful shutdown ──
 function shutdown(signal: string): void {
   logger.info(`${signal} received — shutting down gracefully…`);
-  server.close(() => {
-    logger.info('HTTP server closed. Bye 👋');
-    process.exit(0);
+  server?.close(() => {
+    void disconnectDatabase().finally(() => {
+      logger.info('HTTP server closed. Bye 👋');
+      process.exit(0);
+    });
   });
   // Force-exit if connections don't drain in time.
   setTimeout(() => process.exit(1), 10_000).unref();
