@@ -333,13 +333,18 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 1 — Project Foundation
-CURRENT SUBPHASE: 1.3 — Backend Scaffold & Configuration
+CURRENT SUBPHASE: 1.4 — Shared Layout & Routing Shell
 
 Subphase 1 Progress:
   1.1 Repository & Monorepo Setup        [x] Done
   1.2 Frontend Scaffold & Design System  [x] Done
-  1.3 Backend Scaffold & Configuration   [ ] Next
-  1.4 Shared Layout & Routing Shell      [ ] Not Started
+  1.3 Backend Scaffold & Configuration   [x] Done
+  1.4 Shared Layout & Routing Shell      [ ] Next
+
+Notes:
+  - config/database.ts deferred to Phase 2.1 (needs Prisma schema/generate).
+  - config/cloudinary.ts deferred to Phase 3 (first use).
+  - bcrypt -> bcryptjs, multer 1.x -> 2.x, nodemailer -> 8.x (security; 0 vulns).
 
 Phase Status:
   Phase 1: Foundation            [~] In Progress
