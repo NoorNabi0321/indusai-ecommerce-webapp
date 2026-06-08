@@ -332,19 +332,24 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 1 — Project Foundation
-CURRENT SUBPHASE: 1.4 — Shared Layout & Routing Shell
+CURRENT PHASE: Phase 2 — Database Schema & Authentication
+CURRENT SUBPHASE: 2.1 — Prisma Schema & Database Setup
 
-Subphase 1 Progress:
+Phase 1 — COMPLETE:
   1.1 Repository & Monorepo Setup        [x] Done
   1.2 Frontend Scaffold & Design System  [x] Done
   1.3 Backend Scaffold & Configuration   [x] Done
-  1.4 Shared Layout & Routing Shell      [ ] Next
+  1.4 Shared Layout & Routing Shell      [x] Done
 
 Notes:
   - config/database.ts deferred to Phase 2.1 (needs Prisma schema/generate).
   - config/cloudinary.ts deferred to Phase 3 (first use).
   - bcrypt -> bcryptjs, multer 1.x -> 2.x, nodemailer -> 8.x (security; 0 vulns).
+  - 1.4: 47 routes via a registry + PlaceholderPage (not 47 stub files); real
+    pages slot into router/index.tsx per phase, add React.lazy when heavy.
+  - TEMP: router/guards.tsx PREVIEW_BYPASS=true so protected shells are
+    browsable pre-auth. Phase 2.5 MUST set it false / remove it.
+  - ACTION (you): grab Neon DATABASE_URL + SendGrid before 2.1/2.2.
 
 Phase Status:
   Phase 1: Foundation            [~] In Progress
