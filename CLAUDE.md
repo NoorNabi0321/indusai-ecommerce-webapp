@@ -333,14 +333,14 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 2 — Database Schema & Authentication
-CURRENT SUBPHASE: 2.4 — Frontend Auth Stores & API Layer
+CURRENT SUBPHASE: 2.5 — Auth UI Pages
 
 Phase 2 Progress:
   2.1 Prisma Schema & DB Setup           [x] Done (Neon migrated + seeded)
   2.2 Auth Service & Utilities           [x] Done (Resend email; console fallback)
   2.3 Auth API Endpoints                 [x] Done (8 endpoints, e2e verified)
-  2.4 Frontend Auth Stores & API Layer   [ ] Next
-  2.5 Auth UI Pages                      [ ] (flip PREVIEW_BYPASS off here)
+  2.4 Frontend Auth Stores & API Layer   [x] Done (axios refresh+retry, store, hook)
+  2.5 Auth UI Pages                      [ ] Next — FLIP PREVIEW_BYPASS off here
 
 Notes (2.3):
   - Resend SANDBOX only delivers to account owner (alibift000006@gmail.com).
