@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { CATEGORIES } from '@/lib/constants';
 import { useAuthStore } from '@/stores/authStore';
 import { useCart } from '@/hooks/useCart';
+import { useUIStore } from '@/stores/uiStore';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
 
@@ -20,6 +21,7 @@ export function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { count: cartCount } = useCart();
+  const openSearch = useUIStore((s) => s.setSearchOpen);
 
   // Glass-blur + border once scrolled past 80px (per design spec).
   useEffect(() => {
@@ -81,9 +83,14 @@ export function Navbar() {
 
         {/* Right: actions */}
         <div className="flex items-center gap-1">
-          <IconButton label="Search" to="/search">
+          <button
+            type="button"
+            onClick={() => openSearch(true)}
+            aria-label="Search"
+            className="relative grid size-10 place-items-center rounded-md text-foreground transition-colors hover:bg-accent"
+          >
             <Search className="size-5" />
-          </IconButton>
+          </button>
           <IconButton label="AI Assistant" to="/support" className="hidden sm:grid">
             <Sparkles className="size-5" />
           </IconButton>

@@ -333,14 +333,22 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 4 — Core Customer UI
-CURRENT SUBPHASE: 4.4 — Search & AI Search
+CURRENT SUBPHASE: 4.5 — Wishlist, Profile & Account Pages
 
 Phase 4 Progress:
   4.1 Homepage                           [x] Done (8 sections, live data, verified)
   4.2 Product Listing & Filters          [x] Done (URL-synced filters; verified)
   4.3 Product Detail Page                [x] Done (gallery/variants/cart/reviews)
-  4.4 Search & AI Search                 [ ] Next
-  4.5 Wishlist, Profile & Account Pages  [ ] Not Started
+  4.4 Search & AI Search                 [x] Done (overlay; basic search; verified)
+  4.5 Wishlist, Profile & Account Pages  [ ] Next
+
+Notes (4.4):
+  - GlobalSearch overlay (components/search) rendered once in CustomerLayout;
+    opened via navbar search button or Cmd/Ctrl+K (uiStore.searchOpen).
+  - Debounced (300ms) live product results + "Search for q" + recent searches
+    (localStorage) + category shortcuts; arrow/enter/esc keyboard nav.
+  - Enter / "Search for" -> /search?q= (ProductListingPage from 4.2 renders it).
+  - AI semantic search is Phase 9 (OpenAI); this UX upgrades automatically then.
 
 Notes (4.3):
   - Cart store landed EARLY here (needed for add-to-cart): stores/cartStore
