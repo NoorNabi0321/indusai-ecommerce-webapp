@@ -332,24 +332,28 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 2 — Database Schema & Authentication
-CURRENT SUBPHASE: 2.5 — Auth UI Pages
+CURRENT PHASE: Phase 3 — Product System Backend
+CURRENT SUBPHASE: 3.1 — Product API (Public Endpoints)
 
-Phase 2 Progress:
+Phase 2 — COMPLETE:
   2.1 Prisma Schema & DB Setup           [x] Done (Neon migrated + seeded)
   2.2 Auth Service & Utilities           [x] Done (Resend email; console fallback)
   2.3 Auth API Endpoints                 [x] Done (8 endpoints, e2e verified)
   2.4 Frontend Auth Stores & API Layer   [x] Done (axios refresh+retry, store, hook)
-  2.5 Auth UI Pages                      [ ] Next — FLIP PREVIEW_BYPASS off here
+  2.5 Auth UI Pages                      [x] Done (6 pages; full flow verified live)
 
-Notes (2.3):
+Notes (Phase 2):
   - Resend SANDBOX only delivers to account owner (alibift000006@gmail.com).
     Verify a domain at resend.com/domains for prod to email any recipient.
   - Refresh token in httpOnly cookie 'indusai_rt' (path /api/auth); access
     token returned in body for the frontend to hold in memory.
   - Email sends are resilient (log on failure, never fail the auth operation).
-  2.4 Frontend Auth Stores & API Layer   [ ] Not Started
-  2.5 Auth UI Pages                      [ ] Not Started (flip PREVIEW_BYPASS off)
+  - reset-password is email+OTP based (not userId) so forgot-flow stays private.
+  - initAuth is a single-flight singleton: refresh ROTATES the cookie, so the
+    StrictMode double-invoke would self-logout without it. Don't remove.
+  - PREVIEW_BYPASS removed — guards enforce auth/role; guards show a loader
+    while isInitializing (silent refresh) to avoid bouncing logged-in users.
+  - Seeded owner: owner@indusai.pk / Owner@IndusAI2026 (dev).
 
 Phase 1 — COMPLETE:
   1.1 Repository & Monorepo Setup        [x] Done

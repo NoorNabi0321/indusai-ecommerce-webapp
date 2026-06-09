@@ -5,6 +5,12 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { OwnerLayout } from '@/components/layout/OwnerLayout';
 import { PlaceholderPage } from '@/components/common/PlaceholderPage';
 import { GuestRoute, ProtectedRoute, RoleRoute } from './guards';
+import RegisterPage from '@/pages/auth/RegisterPage';
+import VerifyOtpPage from '@/pages/auth/VerifyOtpPage';
+import LoginPage from '@/pages/auth/LoginPage';
+import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
+import AdminLoginPage from '@/pages/auth/AdminLoginPage';
 
 /**
  * Phase 1.4 routing shell — all 47 pages from the design strategy.
@@ -25,12 +31,12 @@ const routes: RouteObject[] = [
         path: '/auth',
         element: <AuthLayout />,
         children: [
-          { path: 'register', element: ph('A-01', 'Create your account', 'Phase 2.5') },
-          { path: 'verify-otp', element: ph('A-02', 'Verify your email', 'Phase 2.5') },
-          { path: 'login', element: ph('A-03', 'Welcome back', 'Phase 2.5') },
-          { path: 'forgot-password', element: ph('A-04', 'Reset your password', 'Phase 2.5') },
-          { path: 'reset-password', element: ph('A-05', 'Set a new password', 'Phase 2.5') },
-          { path: 'admin-login', element: ph('A-06', 'Admin Portal', 'Phase 2.5') },
+          { path: 'register', element: <RegisterPage /> },
+          { path: 'verify-otp', element: <VerifyOtpPage /> },
+          { path: 'login', element: <LoginPage /> },
+          { path: 'forgot-password', element: <ForgotPasswordPage /> },
+          { path: 'reset-password', element: <ResetPasswordPage /> },
+          { path: 'admin-login', element: <AdminLoginPage /> },
         ],
       },
     ],

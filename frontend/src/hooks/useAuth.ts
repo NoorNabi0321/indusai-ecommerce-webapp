@@ -53,8 +53,8 @@ export function useAuth() {
   );
 
   const resetPassword = useCallback(
-    (userId: string, otp: string, password: string): Promise<void> =>
-      resetPasswordApi(userId, otp, password),
+    (email: string, otp: string, password: string): Promise<void> =>
+      resetPasswordApi(email, otp, password),
     [],
   );
 

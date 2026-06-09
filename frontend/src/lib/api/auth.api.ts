@@ -45,11 +45,11 @@ export async function forgotPasswordApi(email: string): Promise<void> {
 }
 
 export async function resetPasswordApi(
-  userId: string,
+  email: string,
   otp: string,
   password: string,
 ): Promise<void> {
-  await api.post('/auth/reset-password', { userId, otp, password });
+  await api.post('/auth/reset-password', { email, otp, password });
 }
 
 export async function meApi(): Promise<User> {

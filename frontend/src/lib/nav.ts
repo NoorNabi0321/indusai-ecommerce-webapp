@@ -14,6 +14,14 @@ import {
   ScrollText,
   type LucideIcon,
 } from 'lucide-react';
+import type { UserRole } from '@/types/user.types';
+
+/** Landing route for a role after login. */
+export function dashboardPathForRole(role: UserRole): string {
+  if (role === 'OWNER') return '/owner/dashboard';
+  if (role === 'ADMINISTRATOR') return '/admin/dashboard';
+  return '/';
+}
 
 export interface NavItem {
   label: string;

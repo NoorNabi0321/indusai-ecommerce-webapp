@@ -35,7 +35,7 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const resetPasswordSchema = z.object({
-  userId: z.string().uuid('Invalid user reference'),
+  email: z.string().email('Enter a valid email').toLowerCase(),
   otp: otpSchema,
   password: passwordSchema,
 });

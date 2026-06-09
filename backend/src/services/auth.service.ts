@@ -177,22 +177,28 @@ export async function forgotPassword(email: string): Promise<void> {
 }
 
 export async function resetPassword(
-  userId: string,
+  email: string,
   otp: string,
   newPassword: string,
 ): Promise<void> {
-  const valid = await verifyOTPRecord(userId, otp, 'PASSWORD_RESET');
+  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+  // Generic error — never reveal whether the email exists.
+  if (!user) {
+    throw AppError.badRequest('Invalid or expired reset code.');
+  }
+
+  const valid = await verifyOTPRecord(user.id, otp, 'PASSWORD_RESET');
   if (!valid) {
     throw AppError.badRequest('Invalid or expired reset code.');
   }
 
   await prisma.user.update({
-    where: { id: userId },
+    where: { id: user.id },
     data: { password: await hashPassword(newPassword) },
   });
 
   // Force re-authentication everywhere.
-  await prisma.refreshToken.deleteMany({ where: { userId } });
+  await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
 }
 
 /** Fetch the current user (for GET /auth/me). */

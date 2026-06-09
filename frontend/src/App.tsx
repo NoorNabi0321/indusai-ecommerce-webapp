@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { router } from '@/router';
 import { queryClient } from '@/lib/queryClient';
 import { initializeAuth } from '@/lib/initAuth';
+import { Toaster } from '@/components/common/Toaster';
 
 /** Runs the silent-login attempt once on mount. */
 function AuthBootstrapper() {
@@ -18,6 +19,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthBootstrapper />
       <RouterProvider router={router} />
+      <Toaster />
     </QueryClientProvider>
   );
 }
