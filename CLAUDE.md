@@ -333,12 +333,27 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 4 — Core Customer UI
-CURRENT SUBPHASE: 4.3 — Product Detail Page
+CURRENT SUBPHASE: 4.4 — Search & AI Search
 
 Phase 4 Progress:
   4.1 Homepage                           [x] Done (8 sections, live data, verified)
   4.2 Product Listing & Filters          [x] Done (URL-synced filters; verified)
-  4.3 Product Detail Page                [ ] Next
+  4.3 Product Detail Page                [x] Done (gallery/variants/cart/reviews)
+  4.4 Search & AI Search                 [ ] Next
+  4.5 Wishlist, Profile & Account Pages  [ ] Not Started
+
+Notes (4.3):
+  - Cart store landed EARLY here (needed for add-to-cart): stores/cartStore
+    (guest cart in localStorage) + hooks/useCart (unified guest/server). Phase
+    5.1 adds the CartDrawer UI + fly-to-cart animation on top.
+  - Merge-on-login wired in useAuth.login (POST /cart/merge then clearGuest).
+  - Navbar cart badge = useCart().count. Backend setCartItem sets ABSOLUTE qty,
+    so useCart.addToCart computes existing+selected before calling.
+  - Detail page: ProductGallery (zoom+lightbox), VariantSelector (color/size,
+    disables unavailable sizes), PurchasePanel, ProductTabs (Desc/Specs/Reviews/
+    Similar), ProductReviews (histogram+write form), StickyCartBar (IO-triggered).
+  - DB: connectDatabase now RETRIES (5x/3s) — Neon free tier auto-suspends and
+    cold-start can exceed a single attempt. Deep suspend can take >1min to wake.
   4.4 Search & AI Search                 [ ] Not Started
   4.5 Wishlist, Profile & Account Pages  [ ] Not Started
 

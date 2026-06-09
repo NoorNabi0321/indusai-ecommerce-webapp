@@ -18,10 +18,25 @@ if (env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-/** Verify connectivity at startup; throws if the database is unreachable. */
-export async function connectDatabase(): Promise<void> {
-  await prisma.$connect();
-  logger.info('🗄️  Database connected.');
+/**
+ * Verify connectivity at startup, retrying with backoff. Serverless Postgres
+ * (Neon) auto-suspends when idle and can take a few seconds to cold-start, so a
+ * single attempt may time out — we retry before giving up.
+ */
+export async function connectDatabase(retries = 5, delayMs = 3000): Promise<void> {
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
+    try {
+      await prisma.$connect();
+      logger.info('🗄️  Database connected.');
+      return;
+    } catch (error) {
+      if (attempt === retries) throw error;
+      logger.warn(
+        `Database connection attempt ${attempt}/${retries} failed; retrying in ${delayMs}ms…`,
+      );
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
 }
 
 /** Disconnect cleanly during graceful shutdown. */

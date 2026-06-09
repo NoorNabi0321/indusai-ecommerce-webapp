@@ -9,6 +9,9 @@ import {
   forgotPasswordApi,
   resetPasswordApi,
 } from '@/lib/api/auth.api';
+import { mergeCart } from '@/lib/api/cart.api';
+import { useCartStore } from '@/stores/cartStore';
+import { queryClient } from '@/lib/queryClient';
 import type { RegisterPayload, User } from '@/types/user.types';
 
 /**
@@ -27,6 +30,24 @@ export function useAuth() {
     async (email: string, password: string): Promise<User> => {
       const { user: u, accessToken } = await loginApi(email, password);
       setAuth(u, accessToken);
+
+      // Merge any guest cart into the server cart, then clear it.
+      const guest = useCartStore.getState().guestItems;
+      if (guest.length > 0) {
+        try {
+          await mergeCart(
+            guest.map((g) => ({
+              productId: g.productId,
+              variantId: g.variantId,
+              quantity: g.quantity,
+            })),
+          );
+          useCartStore.getState().clearGuest();
+        } catch {
+          // Non-fatal — keep the guest cart if merge fails.
+        }
+      }
+      void queryClient.invalidateQueries({ queryKey: ['cart'] });
       return u;
     },
     [setAuth],

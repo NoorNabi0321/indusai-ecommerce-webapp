@@ -4,8 +4,17 @@ import {
   getFeaturedProducts,
   getFlashDeals,
   getProducts,
+  getProductBySlug,
 } from '@/lib/api/product.api';
 import type { ProductFilters } from '@/types/product.types';
+
+export function useProduct(slug: string | undefined) {
+  return useQuery({
+    queryKey: ['product', slug],
+    queryFn: () => getProductBySlug(slug!),
+    enabled: Boolean(slug),
+  });
+}
 
 const PAGE_SIZE = 12;
 

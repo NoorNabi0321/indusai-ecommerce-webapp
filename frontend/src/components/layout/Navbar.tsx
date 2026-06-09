@@ -5,6 +5,7 @@ import { Search, Sparkles, Heart, ShoppingCart, User, Menu, X } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { CATEGORIES } from '@/lib/constants';
 import { useAuthStore } from '@/stores/authStore';
+import { useCart } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
 
@@ -18,6 +19,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { count: cartCount } = useCart();
 
   // Glass-blur + border once scrolled past 80px (per design spec).
   useEffect(() => {
@@ -88,7 +90,7 @@ export function Navbar() {
           <IconButton label="Wishlist" to="/account/wishlist" badge={0}>
             <Heart className="size-5" />
           </IconButton>
-          <IconButton label="Cart" to="/cart" badge={0}>
+          <IconButton label="Cart" to="/cart" badge={cartCount}>
             <ShoppingCart className="size-5" />
           </IconButton>
 
