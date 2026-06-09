@@ -12,6 +12,7 @@ import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import AdminLoginPage from '@/pages/auth/AdminLoginPage';
 import HomePage from '@/pages/customer/HomePage';
+import ProductListingPage from '@/pages/customer/ProductListingPage';
 
 /**
  * Phase 1.4 routing shell — all 47 pages from the design strategy.
@@ -49,8 +50,8 @@ const routes: RouteObject[] = [
     element: <CustomerLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'shop/:category', element: ph('C-02', 'Product Listing', 'Phase 4.2') },
-      { path: 'search', element: ph('C-03', 'Search Results', 'Phase 4.4') },
+      { path: 'shop/:category', element: <ProductListingPage /> },
+      { path: 'search', element: <ProductListingPage /> },
       { path: 'product/:slug', element: ph('C-04', 'Product Detail', 'Phase 4.3') },
       { path: 'cart', element: ph('C-05', 'Shopping Cart', 'Phase 5.1') },
       { path: 'support', element: ph('C-14', 'AI Support', 'Phase 9.3') },

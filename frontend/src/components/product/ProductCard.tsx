@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, ImageOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, cssColor } from '@/lib/utils';
 import type { Product } from '@/types/product.types';
 import { useAuth } from '@/hooks/useAuth';
 import { addToWishlist } from '@/lib/api/wishlist.api';
@@ -13,9 +13,11 @@ import { PriceDisplay } from '@/components/common/PriceDisplay';
 interface ProductCardProps {
   product: Product;
   className?: string;
+  layout?: 'grid' | 'list';
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({ product, className, layout = 'grid' }: ProductCardProps) {
+  const isList = layout === 'list';
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
@@ -58,12 +60,18 @@ export function ProductCard({ product, className }: ProductCardProps) {
     <Link
       to={`/product/${product.slug}`}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg border border-border bg-bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-bg-overlay hover:shadow-elev-2',
+        'group relative flex overflow-hidden rounded-lg border border-border bg-bg-surface transition-all duration-300 hover:border-bg-overlay hover:shadow-elev-2',
+        isList ? 'flex-row' : 'flex-col hover:-translate-y-1',
         className,
       )}
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-bg-elevated">
+      <div
+        className={cn(
+          'relative aspect-square overflow-hidden bg-bg-elevated',
+          isList && 'w-32 shrink-0 sm:w-44',
+        )}
+      >
         {mainImage ? (
           <>
             <img
@@ -121,7 +129,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
+      <div className={cn('flex flex-1 flex-col gap-1.5 p-3', isList && 'justify-center')}>
         {product.brand && (
           <span className="text-xs uppercase tracking-wide text-muted-foreground">{product.brand}</span>
         )}
@@ -143,15 +151,4 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </div>
     </Link>
   );
-}
-
-/** Best-effort map a colour name to a CSS colour for the swatch dot. */
-function cssColor(name: string): string {
-  const map: Record<string, string> = {
-    white: '#ffffff', black: '#111111', blue: '#3b82f6', red: '#ef4444', green: '#22c55e',
-    grey: '#9ca3af', gray: '#9ca3af', beige: '#e3d5b8', brown: '#8b5e3c', tan: '#d2b48c',
-    navy: '#1e3a8a', silver: '#cbd5e1', gold: '#E4A93A', rose: '#f43f5e', indigo: '#6366f1',
-    turquoise: '#14b8a6', emerald: '#10b981', 'rose gold': '#b76e79',
-  };
-  return map[name.toLowerCase()] ?? '#9ca3af';
 }

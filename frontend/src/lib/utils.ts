@@ -73,3 +73,14 @@ export function getInitials(name: string): string {
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/** Best-effort map a colour name to a CSS colour for swatch dots. */
+export function cssColor(name: string): string {
+  const map: Record<string, string> = {
+    white: '#ffffff', black: '#111111', blue: '#3b82f6', red: '#ef4444', green: '#22c55e',
+    grey: '#9ca3af', gray: '#9ca3af', beige: '#e3d5b8', brown: '#8b5e3c', tan: '#d2b48c',
+    navy: '#1e3a8a', silver: '#cbd5e1', gold: '#E4A93A', rose: '#f43f5e', indigo: '#6366f1',
+    turquoise: '#14b8a6', emerald: '#10b981', 'rose gold': '#b76e79',
+  };
+  return map[name.toLowerCase()] ?? '#9ca3af';
+}
