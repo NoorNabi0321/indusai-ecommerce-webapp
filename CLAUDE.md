@@ -333,7 +333,24 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 4 — Core Customer UI
-CURRENT SUBPHASE: 4.1 — Homepage
+CURRENT SUBPHASE: 4.2 — Product Listing & Filters
+
+Phase 4 Progress:
+  4.1 Homepage                           [x] Done (8 sections, live data, verified)
+  4.2 Product Listing & Filters          [ ] Next
+  4.3 Product Detail Page                [ ] Not Started
+  4.4 Search & AI Search                 [ ] Not Started
+  4.5 Wishlist, Profile & Account Pages  [ ] Not Started
+
+Notes (4.1):
+  - React Query data layer: lib/api/product.api + hooks/useProducts
+    (useCategories/useFeaturedProducts/useFlashDeals/useNewArrivals).
+  - Reusable ProductCard (components/product) — hover crossfade, Sale/LowStock/
+    SoldOut badges, wishlist quick-add (authed -> API, guest -> toast+login).
+  - Shared: StarRating, PriceDisplay (PKR), SkeletonCard; hooks useCountdown,
+    useCountUp (IntersectionObserver). Category imagery via picsum seed (no
+    category.image in DB yet).
+  - Home sections in components/home/*. All handle loading/error/empty.
 
 Phase 3 — COMPLETE:
   3.1 Product API (Public)               [x] Done (6 endpoints, e2e verified)
