@@ -333,7 +333,21 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 3 — Product System Backend
-CURRENT SUBPHASE: 3.1 — Product API (Public Endpoints)
+CURRENT SUBPHASE: 3.2 — Product API (Admin/Owner Protected) — needs Cloudinary
+
+Phase 3 Progress:
+  3.1 Product API (Public)               [x] Done (6 endpoints, e2e verified)
+  3.2 Product API (Admin/Owner CRUD)     [ ] Next — needs CLOUDINARY creds
+  3.3 Review System                      [ ] Not Started
+  3.4 Wishlist & Cart Backend            [ ] Not Started
+
+Notes (3.1):
+  - Decimal -> number serialization in product.service (frontend expects numbers).
+  - reviewStats computed via groupBy (avg/count/histogram[5]); empty = zeros.
+  - 'rating' sort + flash-deals (comparePrice>basePrice) done in-memory on the
+    page/set (Prisma can't compare two columns / sort by relation aggregate).
+  - Route order: /products/featured & /flash-deals BEFORE /:slug.
+  - docs/API.md created (auth + products/categories).
 
 Phase 2 — COMPLETE:
   2.1 Prisma Schema & DB Setup           [x] Done (Neon migrated + seeded)
