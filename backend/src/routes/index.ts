@@ -8,6 +8,9 @@ import { ownerRouter } from './owner.routes';
 import { reviewRouter } from './review.routes';
 import { cartRouter } from './cart.routes';
 import { wishlistRouter } from './wishlist.routes';
+import { userRouter } from './user.routes';
+import { addressRouter } from './address.routes';
+import { notificationRouter } from './notification.routes';
 
 /**
  * Root API router, mounted at `/api`. Feature routers are added here as their
@@ -24,3 +27,6 @@ apiRouter.use('/owner', ownerRouter);
 apiRouter.use('/reviews', reviewRouter);
 apiRouter.use('/cart', cartRouter);
 apiRouter.use('/wishlist', wishlistRouter);
+apiRouter.use('/users', userRouter);
+apiRouter.use('/addresses', addressRouter);
+apiRouter.use('/notifications', notificationRouter);

@@ -14,6 +14,11 @@ import AdminLoginPage from '@/pages/auth/AdminLoginPage';
 import HomePage from '@/pages/customer/HomePage';
 import ProductListingPage from '@/pages/customer/ProductListingPage';
 import ProductDetailPage from '@/pages/customer/ProductDetailPage';
+import { AccountLayout } from '@/components/layout/AccountLayout';
+import WishlistPage from '@/pages/customer/account/WishlistPage';
+import ProfilePage from '@/pages/customer/account/ProfilePage';
+import AddressesPage from '@/pages/customer/account/AddressesPage';
+import NotificationsPage from '@/pages/customer/account/NotificationsPage';
 
 /**
  * Phase 1.4 routing shell — all 47 pages from the design strategy.
@@ -68,19 +73,23 @@ const routes: RouteObject[] = [
             path: 'order-confirmation/:orderId',
             element: ph('C-07', 'Order Confirmation', 'Phase 5.3'),
           },
-          { path: 'account/orders', element: ph('C-08', 'Order History', 'Phase 6.1') },
-          {
-            path: 'account/orders/:orderId',
-            element: ph('C-09', 'Order Tracking', 'Phase 6.1'),
-          },
-          { path: 'account/wishlist', element: ph('C-10', 'Wishlist', 'Phase 4.5') },
-          { path: 'account/profile', element: ph('C-11', 'Profile', 'Phase 4.5') },
-          { path: 'account/addresses', element: ph('C-12', 'Saved Addresses', 'Phase 4.5') },
-          {
-            path: 'account/notifications',
-            element: ph('C-13', 'Notifications', 'Phase 4.5'),
-          },
           { path: 'account/returns/new', element: ph('C-17', 'Request a Return', 'Phase 6.3') },
+
+          // Account dashboard (sidebar layout)
+          {
+            element: <AccountLayout />,
+            children: [
+              { path: 'account/orders', element: ph('C-08', 'Order History', 'Phase 6.1') },
+              {
+                path: 'account/orders/:orderId',
+                element: ph('C-09', 'Order Tracking', 'Phase 6.1'),
+              },
+              { path: 'account/wishlist', element: <WishlistPage /> },
+              { path: 'account/profile', element: <ProfilePage /> },
+              { path: 'account/addresses', element: <AddressesPage /> },
+              { path: 'account/notifications', element: <NotificationsPage /> },
+            ],
+          },
         ],
       },
 

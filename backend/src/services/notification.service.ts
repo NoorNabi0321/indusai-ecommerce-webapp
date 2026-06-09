@@ -33,3 +33,33 @@ export async function notifyRole(role: UserRole, data: NotificationInput): Promi
     logger.error('Failed to create role notifications:', error);
   }
 }
+
+// ───────────────────────── Read APIs (account UI) ────────────────────────
+
+export async function listNotifications(userId: string, page = 1, limit = 20) {
+  const [total, items] = await Promise.all([
+    prisma.notification.count({ where: { userId } }),
+    prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
+  return {
+    items,
+    pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+  };
+}
+
+export function unreadCount(userId: string): Promise<number> {
+  return prisma.notification.count({ where: { userId, isRead: false } });
+}
+
+export async function markRead(userId: string, id: string): Promise<void> {
+  await prisma.notification.updateMany({ where: { id, userId }, data: { isRead: true } });
+}
+
+export async function markAllRead(userId: string): Promise<void> {
+  await prisma.notification.updateMany({ where: { userId, isRead: false }, data: { isRead: true } });
+}

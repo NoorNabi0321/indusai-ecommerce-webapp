@@ -332,15 +332,28 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 4 — Core Customer UI
-CURRENT SUBPHASE: 4.5 — Wishlist, Profile & Account Pages
+CURRENT PHASE: Phase 5 — Cart & Checkout
+CURRENT SUBPHASE: 5.1 — Cart Store & Cart Drawer
 
-Phase 4 Progress:
+Phase 4 — COMPLETE:
   4.1 Homepage                           [x] Done (8 sections, live data, verified)
   4.2 Product Listing & Filters          [x] Done (URL-synced filters; verified)
   4.3 Product Detail Page                [x] Done (gallery/variants/cart/reviews)
   4.4 Search & AI Search                 [x] Done (overlay; basic search; verified)
-  4.5 Wishlist, Profile & Account Pages  [ ] Next
+  4.5 Wishlist, Profile & Account Pages  [x] Done (account API + 4 pages verified)
+
+Notes (4.5):
+  - Backend added: PATCH /users/me, /users/me/password, POST /users/me/avatar
+    (Cloudinary); /addresses CRUD + /:id/default; /notifications list/unread-
+    count/:id/read/read-all. All authenticated. account.validation schemas.
+  - Frontend: AccountLayout (sidebar) wraps account/* routes; WishlistPage,
+    ProfilePage (avatar upload + profile + password), AddressesPage (inline
+    add/edit form, default badge), NotificationsPage (type icons, mark read).
+  - Address delete blocked if linked to an order (FK-safe).
+  - TESTING NOTE: preview_fill + RHF submit is flaky under Vite dep re-optimization
+    (full reloads interrupt). Verified account mutations via direct API test
+    instead; pages render fine. Real keystrokes are unaffected.
+  - cart store/useCart from 4.3; CartDrawer UI is Phase 5.1.
 
 Notes (4.4):
   - GlobalSearch overlay (components/search) rendered once in CustomerLayout;
