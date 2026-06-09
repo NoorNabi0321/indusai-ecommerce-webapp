@@ -112,4 +112,24 @@ All admin/owner product mutations write an `AuditLog` entry (Owner-visible).
 
 ---
 
-*Updated through Phase 3.2. More endpoints added per phase.*
+## Cart — `/api/cart` (authenticated)
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| GET | `/cart` | – | `{ items[], summary: { count, subtotal } }`. |
+| POST | `/cart` | `{ productId, variantId?, quantity }` | Sets the line to `quantity` (absolute). 0 removes. Validates active + stock (400 over-stock / missing variant). |
+| POST | `/cart/merge` | `{ items: [...] }` | Merges a guest cart (sums quantities, capped at stock). |
+| DELETE | `/cart/:itemId` | – | Remove one line. |
+| DELETE | `/cart` | – | Clear cart. |
+
+## Wishlist — `/api/wishlist` (authenticated)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/wishlist` | User's wishlist with product summaries. |
+| POST | `/wishlist/:productId` | Add (idempotent). Returns updated wishlist. |
+| DELETE | `/wishlist/:productId` | Remove. |
+
+---
+
+*Updated through Phase 3.4 — Phase 3 complete.*

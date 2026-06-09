@@ -332,14 +332,22 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 3 — Product System Backend
-CURRENT SUBPHASE: 3.4 — Wishlist & Cart Backend
+CURRENT PHASE: Phase 4 — Core Customer UI
+CURRENT SUBPHASE: 4.1 — Homepage
 
-Phase 3 Progress:
+Phase 3 — COMPLETE:
   3.1 Product API (Public)               [x] Done (6 endpoints, e2e verified)
   3.2 Product API (Admin/Owner CRUD)     [x] Done (Cloudinary live; 12 checks pass)
   3.3 Review System                      [x] Done (purchase-gated; 10 checks pass)
-  3.4 Wishlist & Cart Backend            [ ] Next
+  3.4 Wishlist & Cart Backend            [x] Done (stock-validated; merge; 9 checks)
+
+Notes (3.4):
+  - Cart POST sets ABSOLUTE quantity (0 removes); validates active + variant + stock.
+  - variantId nullable -> use findFirst (Postgres treats NULLs as distinct, so
+    findUnique/upsert on composite-with-null is unreliable).
+  - /cart/merge sums guest+server quantities capped at stock (skips invalid).
+  - Wishlist add is idempotent (upsert). All cart/wishlist routes authenticated.
+  - Guest cart store + merge-on-login wiring is frontend (Phase 5.1).
 
 Notes (3.3):
   - Review requires a DELIVERED order containing the product; 1 per user/product
