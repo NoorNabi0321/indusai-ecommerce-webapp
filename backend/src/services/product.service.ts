@@ -20,8 +20,12 @@ function emptyStats(): ReviewStats {
   return { average: 0, count: 0, histogram: [0, 0, 0, 0, 0] };
 }
 
+export function emptyReviewStats(): ReviewStats {
+  return emptyStats();
+}
+
 /** Compute review stats (avg, count, per-star histogram) for many products at once. */
-async function getReviewStatsMap(productIds: string[]): Promise<Map<string, ReviewStats>> {
+export async function getReviewStatsMap(productIds: string[]): Promise<Map<string, ReviewStats>> {
   const map = new Map<string, ReviewStats>();
   if (productIds.length === 0) return map;
 

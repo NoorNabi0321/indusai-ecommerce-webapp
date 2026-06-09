@@ -61,6 +61,18 @@ and `reviewStats { average, count, histogram[5] }`. List responses include top-l
 
 ---
 
+## Reviews
+
+| Method | Path | Auth | Body | Notes |
+|--------|------|------|------|-------|
+| GET | `/products/:id/reviews?page&limit&star` | – | – | Paginated reviews + aggregate `stats`. |
+| POST | `/products/:id/reviews` | Bearer | `{ rating 1-5, title?, body }` | Requires a DELIVERED order with the product. One per user (409 if dup). |
+| DELETE | `/reviews/:id` | Bearer | – | Author deletes own; ADMIN/OWNER moderate any (audited). |
+
+`:id` is the product **UUID** (not slug). List response: `data: { reviews[], stats }` + `pagination`.
+
+---
+
 ## Categories — `/api/categories`
 
 | Method | Path | Notes |

@@ -5,6 +5,7 @@ import { productRouter } from './product.routes';
 import { categoryRouter } from './category.routes';
 import { adminRouter } from './admin.routes';
 import { ownerRouter } from './owner.routes';
+import { reviewRouter } from './review.routes';
 
 /**
  * Root API router, mounted at `/api`. Feature routers are added here as their
@@ -18,3 +19,4 @@ apiRouter.use('/products', productRouter);
 apiRouter.use('/categories', categoryRouter);
 apiRouter.use('/admin', adminRouter);
 apiRouter.use('/owner', ownerRouter);
+apiRouter.use('/reviews', reviewRouter);

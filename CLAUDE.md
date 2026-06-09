@@ -333,13 +333,19 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 3 — Product System Backend
-CURRENT SUBPHASE: 3.3 — Review System
+CURRENT SUBPHASE: 3.4 — Wishlist & Cart Backend
 
 Phase 3 Progress:
   3.1 Product API (Public)               [x] Done (6 endpoints, e2e verified)
   3.2 Product API (Admin/Owner CRUD)     [x] Done (Cloudinary live; 12 checks pass)
-  3.3 Review System                      [ ] Next
-  3.4 Wishlist & Cart Backend            [ ] Not Started
+  3.3 Review System                      [x] Done (purchase-gated; 10 checks pass)
+  3.4 Wishlist & Cart Backend            [ ] Next
+
+Notes (3.3):
+  - Review requires a DELIVERED order containing the product; 1 per user/product
+    (DB unique userId_productId). ADMIN/OWNER can moderate-delete any (audited).
+  - GET /products/:id/reviews is by product UUID (detail page is by slug).
+  - getReviewStatsMap + emptyReviewStats exported from product.service for reuse.
 
 Notes (3.2):
   - Cloudinary LIVE (cloud ddvgzqsjc); upload_stream -> 800x800 WebP, auto quality.
