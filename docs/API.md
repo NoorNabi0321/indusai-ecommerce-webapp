@@ -70,4 +70,34 @@ and `reviewStats { average, count, histogram[5] }`. List responses include top-l
 
 ---
 
-*Updated through Phase 3.1. More endpoints added per phase.*
+## Admin Products — `/api/admin` (Administrator or Owner)
+
+All require `Authorization: Bearer <token>` with role ADMINISTRATOR or OWNER.
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| POST | `/admin/products` | product JSON (+ `variants[]`) | Creates product. Auto slug + auto SKU. Audit `PRODUCT_CREATE`. |
+| PUT | `/admin/products/:id` | partial product | Updates scalars; variants update-by-id / create (no delete — order refs). |
+| PATCH | `/admin/products/:id/status` | `{ isActive }` | Activate / deactivate. |
+| POST | `/admin/products/:id/images` | multipart `images` (≤5, ≤5MB) | Uploads to Cloudinary (800×800 WebP). First becomes main. |
+| DELETE | `/admin/products/:id/images/:imageId` | – | Removes image (also from Cloudinary); promotes next to main. |
+| POST | `/admin/products/:id/request-delete` | `{ reason }` | Creates a pending DeletionRequest; notifies Owners. |
+
+Create/variant body:
+```jsonc
+{ "name","description","categoryId","brand"?,"tags":[],"basePrice","comparePrice"?,
+  "isFeatured"?,"isActive"?, "variants":[{ "size"?,"color"?,"sku"?,"stock","price"? }] }
+```
+
+## Owner Products — `/api/owner` (Owner only)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| POST | `/owner/products/:id/approve-delete` | Archives product (`isActive=false`), marks request APPROVED, notifies requester. |
+| POST | `/owner/products/:id/reject-delete` | Marks request REJECTED, product stays active. |
+
+All admin/owner product mutations write an `AuditLog` entry (Owner-visible).
+
+---
+
+*Updated through Phase 3.2. More endpoints added per phase.*

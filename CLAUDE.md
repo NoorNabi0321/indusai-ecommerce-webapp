@@ -333,13 +333,22 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 3 — Product System Backend
-CURRENT SUBPHASE: 3.2 — Product API (Admin/Owner Protected) — needs Cloudinary
+CURRENT SUBPHASE: 3.3 — Review System
 
 Phase 3 Progress:
   3.1 Product API (Public)               [x] Done (6 endpoints, e2e verified)
-  3.2 Product API (Admin/Owner CRUD)     [ ] Next — needs CLOUDINARY creds
-  3.3 Review System                      [ ] Not Started
+  3.2 Product API (Admin/Owner CRUD)     [x] Done (Cloudinary live; 12 checks pass)
+  3.3 Review System                      [ ] Next
   3.4 Wishlist & Cart Backend            [ ] Not Started
+
+Notes (3.2):
+  - Cloudinary LIVE (cloud ddvgzqsjc); upload_stream -> 800x800 WebP, auto quality.
+  - Image upload via multer memoryStorage (5MB/5 files); first image = main.
+  - Update does NOT delete variants (order FK refs); updates by id / creates new.
+  - Deletion = soft (isActive=false) on Owner approve, preserves order history.
+  - audit.service.writeAuditLog + notification.service (notifyUser/notifyRole)
+    are shared helpers reused in later phases.
+  - config/cloudinary.ts added here (was deferred from 1.3).
 
 Notes (3.1):
   - Decimal -> number serialization in product.service (frontend expects numbers).

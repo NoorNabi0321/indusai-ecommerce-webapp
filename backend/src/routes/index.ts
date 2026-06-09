@@ -3,6 +3,8 @@ import { healthRouter } from './health.routes';
 import { authRouter } from './auth.routes';
 import { productRouter } from './product.routes';
 import { categoryRouter } from './category.routes';
+import { adminRouter } from './admin.routes';
+import { ownerRouter } from './owner.routes';
 
 /**
  * Root API router, mounted at `/api`. Feature routers are added here as their
@@ -14,3 +16,5 @@ apiRouter.use('/health', healthRouter);
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/products', productRouter);
 apiRouter.use('/categories', categoryRouter);
+apiRouter.use('/admin', adminRouter);
+apiRouter.use('/owner', ownerRouter);

@@ -54,7 +54,7 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
   include: { category: true; variants: true; images: true };
 }>;
 
-function mapProduct(p: ProductWithRelations, stats?: ReviewStats) {
+export function mapProduct(p: ProductWithRelations, stats?: ReviewStats) {
   return {
     id: p.id,
     name: p.name,
@@ -76,7 +76,7 @@ function mapProduct(p: ProductWithRelations, stats?: ReviewStats) {
   };
 }
 
-const PRODUCT_INCLUDE = {
+export const PRODUCT_INCLUDE = {
   category: true,
   variants: true,
   images: { orderBy: { order: 'asc' } },
