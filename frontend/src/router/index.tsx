@@ -22,6 +22,8 @@ import FaqPage from '@/pages/customer/FaqPage';
 import NotFoundPage from '@/pages/customer/NotFoundPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
+import OrderHistoryPage from '@/pages/customer/account/OrderHistoryPage';
+import OrderDetailPage from '@/pages/customer/account/OrderDetailPage';
 import ProfilePage from '@/pages/customer/account/ProfilePage';
 import AddressesPage from '@/pages/customer/account/AddressesPage';
 import NotificationsPage from '@/pages/customer/account/NotificationsPage';
@@ -82,11 +84,8 @@ const routes: RouteObject[] = [
           {
             element: <AccountLayout />,
             children: [
-              { path: 'account/orders', element: ph('C-08', 'Order History', 'Phase 6.1') },
-              {
-                path: 'account/orders/:orderId',
-                element: ph('C-09', 'Order Tracking', 'Phase 6.1'),
-              },
+              { path: 'account/orders', element: <OrderHistoryPage /> },
+              { path: 'account/orders/:orderId', element: <OrderDetailPage /> },
               { path: 'account/wishlist', element: <WishlistPage /> },
               { path: 'account/profile', element: <ProfilePage /> },
               { path: 'account/addresses', element: <AddressesPage /> },

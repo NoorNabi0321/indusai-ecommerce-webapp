@@ -1,7 +1,18 @@
 import { api } from '@/lib/axios';
-import type { ApiSuccess } from '@/types/api.types';
+import type { ApiSuccess, Pagination } from '@/types/api.types';
 import type { Address } from '@/types/user.types';
 import type { OrderStatus, PaymentMethod, PaymentStatus } from '@/types/order.types';
+
+export interface OrderSummary {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  total: number;
+  createdAt: string;
+  paymentMethod: PaymentMethod | null;
+  itemCount: number;
+  thumbnails: string[];
+}
 
 export interface OrderItemDTO {
   id: string;
@@ -54,4 +65,11 @@ export async function createOrder(payload: CreateOrderPayload): Promise<OrderDTO
 export async function getOrder(id: string): Promise<OrderDTO> {
   const { data } = await api.get<ApiSuccess<OrderDTO>>(`/orders/${id}`);
   return data.data;
+}
+
+export async function listOrders(
+  params: { status?: string; page?: number; limit?: number } = {},
+): Promise<{ items: OrderSummary[]; pagination: Pagination }> {
+  const { data } = await api.get<ApiSuccess<OrderSummary[]>>('/orders', { params });
+  return { items: data.data, pagination: data.pagination! };
 }

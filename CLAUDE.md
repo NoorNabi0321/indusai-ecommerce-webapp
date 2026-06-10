@@ -333,7 +333,21 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 6 — Order Management
-CURRENT SUBPHASE: 6.1 — Customer Order History & Tracking
+CURRENT SUBPHASE: 6.2 — Admin Order Management
+
+Phase 6 Progress:
+  6.1 Customer Order History & Tracking  [x] Done (list + timeline, verified)
+  6.2 Admin Order Management             [ ] Next
+  6.3 Returns / Refund Requests          [ ] Not Started
+
+Notes (6.1):
+  - Backend: GET /orders (listOrders: status filter + pagination, lightweight
+    summaries w/ thumbnails + itemCount). getOrderById already existed.
+  - Frontend: OrderHistoryPage (status filter tabs, order cards) + OrderDetailPage
+    (vertical tracking timeline PENDING->PROCESSING->SHIPPED->DELIVERED, items,
+    delivery, payment, actions). Shared StatusBadge (components/common).
+  - Request Return button shows only when DELIVERED (-> 6.3). Invoice download
+    is a stub (toast). Both pages under AccountLayout.
 
 Phase 5 — COMPLETE:
   5.1 Cart Store & Cart Drawer           [x] Done (drawer + /cart page, verified)

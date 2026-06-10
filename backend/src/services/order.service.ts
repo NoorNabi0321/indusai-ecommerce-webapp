@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { Prisma, type UserRole } from '@prisma/client';
+import { Prisma, type UserRole, type OrderStatus } from '@prisma/client';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
 import { sendOrderConfirmationEmail } from '../utils/email';
@@ -177,6 +177,49 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
   }
 
   return mapOrder(order);
+}
+
+/** Paginated order list for a customer (lightweight summaries). */
+export async function listOrders(
+  userId: string,
+  opts: { status?: OrderStatus; page?: number; limit?: number } = {},
+) {
+  const page = opts.page ?? 1;
+  const limit = opts.limit ?? 10;
+  const where: Prisma.OrderWhereInput = { userId, ...(opts.status ? { status: opts.status } : {}) };
+
+  const [total, orders] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        items: { include: { product: { include: { images: { where: { isMain: true }, take: 1 } } } } },
+        payment: true,
+      },
+    }),
+  ]);
+
+  const items = orders.map((o) => ({
+    id: o.id,
+    orderNumber: o.orderNumber,
+    status: o.status,
+    total: Number(o.total),
+    createdAt: o.createdAt,
+    paymentMethod: o.payment?.method ?? null,
+    itemCount: o.items.reduce((s, i) => s + i.quantity, 0),
+    thumbnails: o.items
+      .map((i) => i.product.images[0]?.url)
+      .filter((u): u is string => Boolean(u))
+      .slice(0, 4),
+  }));
+
+  return {
+    items,
+    pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+  };
 }
 
 /** Fetch a single order (owner-scoped; admins/owners can view any). */
