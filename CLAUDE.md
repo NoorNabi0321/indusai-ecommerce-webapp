@@ -332,13 +332,28 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 6 — Order Management
-CURRENT SUBPHASE: 6.3 — Returns / Refund Requests
+CURRENT PHASE: Phase 7 — Admin Panel
+CURRENT SUBPHASE: 7.1 — Admin Dashboard
 
-Phase 6 Progress:
+Phase 6 — COMPLETE:
   6.1 Customer Order History & Tracking  [x] Done (list + timeline, verified)
   6.2 Admin Order Management             [x] Done (list+status update; verified)
-  6.3 Returns / Refund Requests          [ ] Next
+  6.3 Returns / Refund Requests          [x] Done (3-step flow; verified)
+
+Notes (6.3):
+  - MIGRATION 20260610082022_return_requests: ReturnRequest + ReturnItem models;
+    enums ReturnReason / RefundMethod / ReturnStatus. Back-relations on User,
+    Order, OrderItem.
+  - return.service.createReturn: requires DELIVERED order within 7-day window,
+    validates items belong to order + qty, blocks duplicate active return,
+    uploads photos to Cloudinary (indusai/returns), notifies ADMIN+OWNER+customer.
+    listMyReturns for customer.
+  - POST /api/returns is MULTIPART (upload.array('photos',5) THEN validate);
+    items sent as JSON string -> zod transform+pipe. GET /returns/me.
+  - Frontend ReturnRequestPage (3-step: items -> reason+desc+photos -> refund ->
+    confirmation). Order detail "Request Return" -> ?orderId=. Only DELIVERED.
+  - Admin return MANAGEMENT (approve/reject/process) NOT built yet — request flow
+    + storage + notifications done; admin processing is a later enhancement.
 
 Notes (6.2):
   - MIGRATION 20260610075148_order_tracking_notes: added Order.trackingNumber +

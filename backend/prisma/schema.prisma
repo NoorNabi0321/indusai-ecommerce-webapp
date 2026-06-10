@@ -35,6 +35,7 @@ model User {
   otpRecords    OTPRecord[]
   auditLogs     AuditLog[]     @relation("ActorLogs")
   products      Product[]      @relation("CreatedProducts")
+  returns       ReturnRequest[]
 
   @@index([role])
 }
@@ -134,10 +135,11 @@ model Order {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
-  user    User        @relation(fields: [userId], references: [id])
-  address Address     @relation(fields: [addressId], references: [id])
+  user    User            @relation(fields: [userId], references: [id])
+  address Address         @relation(fields: [addressId], references: [id])
   items   OrderItem[]
   payment Payment?
+  returns ReturnRequest[]
 
   @@index([userId])
   @@index([status])
@@ -160,9 +162,10 @@ model OrderItem {
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
 
-  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product         @relation(fields: [productId], references: [id])
-  variant ProductVariant? @relation(fields: [variantId], references: [id])
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product         @relation(fields: [productId], references: [id])
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  returnItems ReturnItem[]
 
   @@index([orderId])
   @@index([productId])
@@ -305,6 +308,62 @@ enum DeletionRequestStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+// ─────────────────────────── Returns / Refunds ───────────────────────────
+
+model ReturnRequest {
+  id           String       @id @default(uuid())
+  orderId      String
+  userId       String
+  reason       ReturnReason
+  description  String?
+  refundMethod RefundMethod
+  status       ReturnStatus @default(PENDING)
+  photos       String[]
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  order Order        @relation(fields: [orderId], references: [id])
+  user  User         @relation(fields: [userId], references: [id])
+  items ReturnItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model ReturnItem {
+  id              String @id @default(uuid())
+  returnRequestId String
+  orderItemId     String
+  quantity        Int
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  orderItem     OrderItem     @relation(fields: [orderItemId], references: [id])
+
+  @@index([returnRequestId])
+}
+
+enum ReturnReason {
+  DEFECTIVE
+  WRONG_ITEM
+  NOT_AS_DESCRIBED
+  CHANGED_MIND
+  SIZE_ISSUE
+  OTHER
+}
+
+enum RefundMethod {
+  ORIGINAL
+  STORE_CREDIT
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
 }
 
 // ─────────────────────────── Auth records ────────────────────────────

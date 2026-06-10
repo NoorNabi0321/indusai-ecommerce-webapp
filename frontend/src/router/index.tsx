@@ -22,6 +22,7 @@ import FaqPage from '@/pages/customer/FaqPage';
 import NotFoundPage from '@/pages/customer/NotFoundPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
+import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
 import OrderHistoryPage from '@/pages/customer/account/OrderHistoryPage';
@@ -80,7 +81,7 @@ const routes: RouteObject[] = [
         children: [
           { path: 'checkout', element: <CheckoutPage /> },
           { path: 'order-confirmation/:orderId', element: <OrderConfirmationPage /> },
-          { path: 'account/returns/new', element: ph('C-17', 'Request a Return', 'Phase 6.3') },
+          { path: 'account/returns/new', element: <ReturnRequestPage /> },
 
           // Account dashboard (sidebar layout)
           {

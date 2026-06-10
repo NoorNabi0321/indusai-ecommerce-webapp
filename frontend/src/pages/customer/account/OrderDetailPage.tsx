@@ -142,7 +142,7 @@ export default function OrderDetailPage() {
             </Button>
             {order.status === 'DELIVERED' && (
               <Button asChild variant="outline" className="w-full">
-                <Link to="/account/returns/new"><RotateCcw className="size-4" /> Request Return</Link>
+                <Link to={`/account/returns/new?orderId=${order.id}`}><RotateCcw className="size-4" /> Request Return</Link>
               </Button>
             )}
             <Button asChild variant="ghost" className="w-full">
