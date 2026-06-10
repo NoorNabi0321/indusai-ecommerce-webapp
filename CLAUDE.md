@@ -333,12 +333,28 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 6 — Order Management
-CURRENT SUBPHASE: 6.2 — Admin Order Management
+CURRENT SUBPHASE: 6.3 — Returns / Refund Requests
 
 Phase 6 Progress:
   6.1 Customer Order History & Tracking  [x] Done (list + timeline, verified)
-  6.2 Admin Order Management             [ ] Next
-  6.3 Returns / Refund Requests          [ ] Not Started
+  6.2 Admin Order Management             [x] Done (list+status update; verified)
+  6.3 Returns / Refund Requests          [ ] Next
+
+Notes (6.2):
+  - MIGRATION 20260610075148_order_tracking_notes: added Order.trackingNumber +
+    Order.internalNotes (String?).
+  - order.service: mapOrder(order, isAdmin) — admin map adds internalNotes +
+    customer {id,name,email,phone}; customer map omits them (privacy). getOrderById
+    passes isStaff so ONE endpoint serves both customer + admin detail.
+  - listAllOrders (status/payment/search + groupBy status counts);
+    updateOrderStatus (tx: status + tracking/notes; RESTORES stock on
+    CANCELLED/REFUNDED; payment->PAID on DELIVERED / REFUNDED; notify customer;
+    audit ORDER_STATUS_UPDATE).
+  - Admin routes: GET /admin/orders, PATCH /admin/orders/:id/status.
+  - Frontend: AdminOrdersPage (summary strip + filters + table), AdminOrderDetailPage
+    (status updater + tracking + internal notes + customer/delivery panels).
+  - Verified live: owner updated order PENDING->PROCESSING, tracking+notes saved,
+    customer notification created.
 
 Notes (6.1):
   - Backend: GET /orders (listOrders: status filter + pagination, lightweight

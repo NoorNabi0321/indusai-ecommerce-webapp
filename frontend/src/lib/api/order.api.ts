@@ -43,11 +43,27 @@ export interface OrderDTO {
   discount: number;
   total: number;
   notes: string | null;
+  trackingNumber: string | null;
   createdAt: string;
   updatedAt: string;
   address: Address;
   payment: PaymentDTO | null;
   items: OrderItemDTO[];
+  // Admin-only
+  internalNotes?: string | null;
+  customer?: { id: string; name: string; email: string; phone: string | null };
+}
+
+export interface AdminOrderSummary {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  total: number;
+  createdAt: string;
+  customer: { name: string; email: string };
+  paymentMethod: PaymentMethod | null;
+  paymentStatus: PaymentStatus | null;
+  itemCount: number;
 }
 
 export interface CreateOrderPayload {
@@ -72,4 +88,23 @@ export async function listOrders(
 ): Promise<{ items: OrderSummary[]; pagination: Pagination }> {
   const { data } = await api.get<ApiSuccess<OrderSummary[]>>('/orders', { params });
   return { items: data.data, pagination: data.pagination! };
+}
+
+// ── Admin ──
+export async function adminListOrders(
+  params: { status?: string; paymentMethod?: string; search?: string; page?: number; limit?: number } = {},
+): Promise<{ items: AdminOrderSummary[]; counts: Record<string, number>; pagination: Pagination }> {
+  const { data } = await api.get<ApiSuccess<AdminOrderSummary[]> & { meta?: { counts: Record<string, number> } }>(
+    '/admin/orders',
+    { params },
+  );
+  return { items: data.data, counts: data.meta?.counts ?? {}, pagination: data.pagination! };
+}
+
+export async function updateOrderStatus(
+  id: string,
+  payload: { status: OrderStatus; trackingNumber?: string; internalNotes?: string },
+): Promise<OrderDTO> {
+  const { data } = await api.patch<ApiSuccess<OrderDTO>>(`/admin/orders/${id}/status`, payload);
+  return data.data;
 }

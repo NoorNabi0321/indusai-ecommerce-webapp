@@ -4,8 +4,15 @@ import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
 import { sendOrderConfirmationEmail } from '../utils/email';
 import { notifyUser, notifyRole } from './notification.service';
+import { writeAuditLog } from './audit.service';
 import { logger } from '../utils/logger';
 import type { CreateOrderInput } from '../validation/order.validation';
+
+interface Actor {
+  id: string;
+  role: UserRole;
+  ip?: string;
+}
 
 const FREE_SHIPPING_THRESHOLD = 2000;
 const STANDARD_SHIPPING = 200;
@@ -31,11 +38,12 @@ const ORDER_INCLUDE = {
   },
   address: true,
   payment: true,
+  user: { select: { id: true, name: true, email: true, phone: true } },
 } satisfies Prisma.OrderInclude;
 
 type OrderWithRelations = Prisma.OrderGetPayload<{ include: typeof ORDER_INCLUDE }>;
 
-function mapOrder(order: OrderWithRelations) {
+function mapOrder(order: OrderWithRelations, isAdmin = false) {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -46,12 +54,15 @@ function mapOrder(order: OrderWithRelations) {
     discount: Number(order.discount),
     total: Number(order.total),
     notes: order.notes,
+    trackingNumber: order.trackingNumber,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
     address: order.address,
     payment: order.payment
       ? { ...order.payment, amount: Number(order.payment.amount) }
       : null,
+    // Admin-only fields
+    ...(isAdmin ? { internalNotes: order.internalNotes, customer: order.user } : {}),
     items: order.items.map((it) => ({
       id: it.id,
       productId: it.productId,
@@ -222,11 +233,135 @@ export async function listOrders(
   };
 }
 
-/** Fetch a single order (owner-scoped; admins/owners can view any). */
+/** Fetch a single order (owner-scoped; admins/owners can view any + internal fields). */
 export async function getOrderById(userId: string, role: UserRole, orderId: string) {
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: ORDER_INCLUDE });
   if (!order) throw AppError.notFound('Order not found.');
   const isStaff = role === 'ADMINISTRATOR' || role === 'OWNER';
   if (order.userId !== userId && !isStaff) throw AppError.forbidden('You cannot view this order.');
-  return mapOrder(order);
+  return mapOrder(order, isStaff);
+}
+
+// ───────────────────────────── Admin: list ───────────────────────────────
+
+export async function listAllOrders(opts: {
+  status?: OrderStatus;
+  paymentMethod?: 'STRIPE' | 'JAZZCASH' | 'EASYPAISA' | 'COD';
+  search?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const page = opts.page ?? 1;
+  const limit = opts.limit ?? 20;
+  const where: Prisma.OrderWhereInput = {};
+  if (opts.status) where.status = opts.status;
+  if (opts.paymentMethod) where.payment = { method: opts.paymentMethod };
+  if (opts.search) {
+    where.OR = [
+      { orderNumber: { contains: opts.search, mode: 'insensitive' } },
+      { user: { name: { contains: opts.search, mode: 'insensitive' } } },
+      { user: { email: { contains: opts.search, mode: 'insensitive' } } },
+    ];
+  }
+
+  const [total, orders, grouped] = await Promise.all([
+    prisma.order.count({ where }),
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        user: { select: { name: true, email: true } },
+        payment: true,
+        _count: { select: { items: true } },
+      },
+    }),
+    prisma.order.groupBy({ by: ['status'], _count: { _all: true } }),
+  ]);
+
+  const counts: Record<string, number> = {};
+  for (const g of grouped) counts[g.status] = g._count._all;
+
+  const items = orders.map((o) => ({
+    id: o.id,
+    orderNumber: o.orderNumber,
+    status: o.status,
+    total: Number(o.total),
+    createdAt: o.createdAt,
+    customer: o.user,
+    paymentMethod: o.payment?.method ?? null,
+    paymentStatus: o.payment?.status ?? null,
+    itemCount: o._count.items,
+  }));
+
+  return {
+    items,
+    counts,
+    pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+  };
+}
+
+// ───────────────────────── Admin: update status ──────────────────────────
+
+export async function updateOrderStatus(
+  actor: Actor,
+  orderId: string,
+  status: OrderStatus,
+  extra: { trackingNumber?: string; internalNotes?: string },
+) {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+  if (!order) throw AppError.notFound('Order not found.');
+
+  const wasCancelled = order.status === 'CANCELLED' || order.status === 'REFUNDED';
+  const restoreStock = (status === 'CANCELLED' || status === 'REFUNDED') && !wasCancelled;
+
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status,
+          ...(extra.trackingNumber !== undefined ? { trackingNumber: extra.trackingNumber } : {}),
+          ...(extra.internalNotes !== undefined ? { internalNotes: extra.internalNotes } : {}),
+        },
+      });
+
+      if (restoreStock) {
+        for (const item of order.items) {
+          if (item.variantId) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { stock: { increment: item.quantity } },
+            });
+          }
+        }
+      }
+
+      if (status === 'DELIVERED') {
+        await tx.payment.updateMany({ where: { orderId }, data: { status: 'PAID' } });
+      } else if (status === 'REFUNDED') {
+        await tx.payment.updateMany({ where: { orderId }, data: { status: 'REFUNDED' } });
+      }
+    },
+    { maxWait: 10_000, timeout: 20_000 },
+  );
+
+  await notifyUser(order.userId, {
+    type: 'ORDER_UPDATE',
+    title: `Order ${status.toLowerCase()}`,
+    message: `Your order ${order.orderNumber} is now ${status.toLowerCase()}.`,
+    link: `/account/orders/${orderId}`,
+  });
+
+  await writeAuditLog({
+    actorId: actor.id,
+    actorRole: actor.role,
+    action: 'ORDER_STATUS_UPDATE',
+    target: 'Order',
+    targetId: orderId,
+    ipAddress: actor.ip,
+  });
+
+  return getOrderById(actor.id, actor.role, orderId);
 }

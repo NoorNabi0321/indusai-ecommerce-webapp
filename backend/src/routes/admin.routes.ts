@@ -9,12 +9,18 @@ import {
   toggleStatusSchema,
   requestDeleteSchema,
 } from '../validation/admin-product.validation';
+import { updateOrderStatusSchema } from '../validation/order.validation';
 import * as ctrl from '../controllers/admin-product.controller';
+import * as orderCtrl from '../controllers/admin-order.controller';
 
 export const adminRouter = Router();
 
 // All admin routes require an authenticated Administrator or Owner.
 adminRouter.use(authenticate, requireRole('ADMINISTRATOR', 'OWNER'));
+
+// Orders
+adminRouter.get('/orders', orderCtrl.listAllOrders);
+adminRouter.patch('/orders/:id/status', validate({ body: updateOrderStatusSchema }), orderCtrl.updateOrderStatus);
 
 adminRouter.post('/products', validate({ body: createProductSchema }), ctrl.createProduct);
 adminRouter.put('/products/:id', validate({ body: updateProductSchema }), ctrl.updateProduct);

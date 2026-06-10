@@ -20,6 +20,8 @@ import OrderConfirmationPage from '@/pages/customer/OrderConfirmationPage';
 import AboutPage from '@/pages/customer/AboutPage';
 import FaqPage from '@/pages/customer/FaqPage';
 import NotFoundPage from '@/pages/customer/NotFoundPage';
+import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
+import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
 import OrderHistoryPage from '@/pages/customer/account/OrderHistoryPage';
@@ -117,8 +119,8 @@ const routes: RouteObject[] = [
             path: 'products/:id/request-delete',
             element: ph('AD-12', 'Request Deletion', 'Phase 7.2'),
           },
-          { path: 'orders', element: ph('AD-04', 'Order Management', 'Phase 6.2') },
-          { path: 'orders/:orderId', element: ph('AD-05', 'Order Detail', 'Phase 6.2') },
+          { path: 'orders', element: <AdminOrdersPage /> },
+          { path: 'orders/:orderId', element: <AdminOrderDetailPage /> },
           { path: 'customers', element: ph('AD-06', 'Customer Management', 'Phase 7.3') },
           { path: 'customers/:customerId', element: ph('AD-07', 'Customer Profile', 'Phase 7.3') },
           { path: 'inventory', element: ph('AD-09', 'Inventory Alerts', 'Phase 7.4') },
