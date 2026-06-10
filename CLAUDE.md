@@ -333,13 +333,25 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 5 — Cart & Checkout
-CURRENT SUBPHASE: 5.2 — Checkout Flow
+CURRENT SUBPHASE: 5.3 — Order Placement
 
 Phase 5 Progress:
   5.1 Cart Store & Cart Drawer           [x] Done (drawer + /cart page, verified)
-  5.2 Checkout Flow                      [ ] Next
-  5.3 Order Placement                    [ ] Not Started
+  5.2 Checkout Flow                      [x] Done (3-step stepper, verified)
+  5.3 Order Placement                    [ ] Next
   5.4 About / FAQ / 404 pages            [ ] Not Started
+
+Notes (5.2):
+  - CheckoutPage (/checkout): 3-step stepper (Delivery/Payment/Review). Step 1
+    address radio cards + AddressForm (extracted to components/account/AddressForm,
+    shared with AddressesPage) + delivery method (Standard=computeShipping,
+    Express=Rs500). Step 2: COD/STRIPE/JAZZCASH/EASYPAISA selection + method
+    fields (card/wallet are VISUAL only; real processing = Phase 10). Step 3:
+    review w/ edit links + terms + Place Order.
+  - Place Order currently toasts a placeholder — createOrder endpoint + order
+    confirmation page are Subphase 5.3.
+  - Sidebar order summary recomputes total = subtotal + deliveryFee.
+  - Verified live (owner): full 3-step flow with seeded cart item + address.
 
 Notes (5.1):
   - CartDrawer (components/cart) rendered once in CustomerLayout; opens via

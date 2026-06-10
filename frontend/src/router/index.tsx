@@ -15,6 +15,7 @@ import HomePage from '@/pages/customer/HomePage';
 import ProductListingPage from '@/pages/customer/ProductListingPage';
 import ProductDetailPage from '@/pages/customer/ProductDetailPage';
 import CartPage from '@/pages/customer/CartPage';
+import CheckoutPage from '@/pages/customer/CheckoutPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
 import ProfilePage from '@/pages/customer/account/ProfilePage';
@@ -69,7 +70,7 @@ const routes: RouteObject[] = [
       {
         element: <ProtectedRoute />,
         children: [
-          { path: 'checkout', element: ph('C-06', 'Checkout', 'Phase 5.2') },
+          { path: 'checkout', element: <CheckoutPage /> },
           {
             path: 'order-confirmation/:orderId',
             element: ph('C-07', 'Order Confirmation', 'Phase 5.3'),
