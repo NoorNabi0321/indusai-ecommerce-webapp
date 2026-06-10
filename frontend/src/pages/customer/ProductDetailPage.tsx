@@ -5,6 +5,7 @@ import { APP_NAME } from '@/lib/constants';
 import type { ProductVariant } from '@/types/product.types';
 import { useProduct } from '@/hooks/useProducts';
 import { useCart } from '@/hooks/useCart';
+import { useCartStore } from '@/stores/cartStore';
 import { useAuth } from '@/hooks/useAuth';
 import { addToWishlist } from '@/lib/api/wishlist.api';
 import { toast } from '@/lib/toast';
@@ -22,6 +23,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const { data: product, isLoading, isError } = useProduct(slug);
   const { addToCart } = useCart();
+  const openCart = useCartStore((s) => s.setOpen);
   const { isAuthenticated } = useAuth();
 
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -115,6 +117,7 @@ export default function ProductDetailPage() {
         maxStock,
       });
       toast.success('Added to your cart.');
+      openCart(true);
     } catch (e) {
       toast.error(getApiError(e).message);
     } finally {

@@ -7,6 +7,7 @@ import { CATEGORIES } from '@/lib/constants';
 import { useAuthStore } from '@/stores/authStore';
 import { useCart } from '@/hooks/useCart';
 import { useUIStore } from '@/stores/uiStore';
+import { useCartStore } from '@/stores/cartStore';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
 
@@ -22,6 +23,7 @@ export function Navbar() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { count: cartCount } = useCart();
   const openSearch = useUIStore((s) => s.setSearchOpen);
+  const openCart = useCartStore((s) => s.setOpen);
 
   // Glass-blur + border once scrolled past 80px (per design spec).
   useEffect(() => {
@@ -97,9 +99,19 @@ export function Navbar() {
           <IconButton label="Wishlist" to="/account/wishlist" badge={0}>
             <Heart className="size-5" />
           </IconButton>
-          <IconButton label="Cart" to="/cart" badge={cartCount}>
+          <button
+            type="button"
+            onClick={() => openCart(true)}
+            aria-label="Cart"
+            className="relative grid size-10 place-items-center rounded-md text-foreground transition-colors hover:bg-accent"
+          >
             <ShoppingCart className="size-5" />
-          </IconButton>
+            {cartCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-gold-base px-1 text-[10px] font-bold text-bg-base">
+                {cartCount}
+              </span>
+            )}
+          </button>
 
           {isAuthenticated ? (
             <IconButton label="Account" to="/account/profile">

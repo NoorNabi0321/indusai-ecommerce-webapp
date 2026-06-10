@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
+import { CartDrawer } from '@/components/cart/CartDrawer';
 
 /** Customer-facing shell: sticky navbar + content + footer. */
 export function CustomerLayout() {
@@ -13,6 +14,7 @@ export function CustomerLayout() {
       </main>
       <Footer />
       <GlobalSearch />
+      <CartDrawer />
     </div>
   );
 }

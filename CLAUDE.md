@@ -333,7 +333,21 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 5 — Cart & Checkout
-CURRENT SUBPHASE: 5.1 — Cart Store & Cart Drawer
+CURRENT SUBPHASE: 5.2 — Checkout Flow
+
+Phase 5 Progress:
+  5.1 Cart Store & Cart Drawer           [x] Done (drawer + /cart page, verified)
+  5.2 Checkout Flow                      [ ] Next
+  5.3 Order Placement                    [ ] Not Started
+  5.4 About / FAQ / 404 pages            [ ] Not Started
+
+Notes (5.1):
+  - CartDrawer (components/cart) rendered once in CustomerLayout; opens via
+    navbar cart button (cartStore.isOpen) and auto-opens after add-to-cart.
+  - CartPage (/cart): items list + OrderSummary (shipping free >= threshold,
+    else STANDARD_SHIPPING=200; free-shipping progress bar). CartLineItem shared
+    by drawer + page. computeShipping/OrderSummary reused in checkout (5.2).
+  - cart store/useCart were built in 4.3 (guest localStorage + server merge).
 
 Phase 4 — COMPLETE:
   4.1 Homepage                           [x] Done (8 sections, live data, verified)
