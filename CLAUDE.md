@@ -332,14 +332,20 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 5 — Cart & Checkout
-CURRENT SUBPHASE: 5.4 — About / FAQ / 404 pages
+CURRENT PHASE: Phase 6 — Order Management
+CURRENT SUBPHASE: 6.1 — Customer Order History & Tracking
 
-Phase 5 Progress:
+Phase 5 — COMPLETE:
   5.1 Cart Store & Cart Drawer           [x] Done (drawer + /cart page, verified)
   5.2 Checkout Flow                      [x] Done (3-step stepper, verified)
   5.3 Order Placement                    [x] Done (createOrder + confirmation, verified)
-  5.4 About / FAQ / 404 pages            [ ] Next
+  5.4 About / FAQ / 404 pages            [x] Done (3 static pages, verified)
+
+Notes (5.4):
+  - AboutPage (hero/orbs, mission, useCountUp stats, values, contact),
+    FaqPage (search-filtered accordion by category + "still need help" CTA),
+    NotFoundPage (404 catch-all within CustomerLayout; opens GlobalSearch).
+  - All static/frontend-only. Wired about/faq/* routes; '*' -> NotFoundPage.
 
 Notes (5.3):
   - order.service.createOrder: $transaction (validate stock, create Order+items+

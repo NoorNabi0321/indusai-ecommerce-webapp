@@ -17,6 +17,9 @@ import ProductDetailPage from '@/pages/customer/ProductDetailPage';
 import CartPage from '@/pages/customer/CartPage';
 import CheckoutPage from '@/pages/customer/CheckoutPage';
 import OrderConfirmationPage from '@/pages/customer/OrderConfirmationPage';
+import AboutPage from '@/pages/customer/AboutPage';
+import FaqPage from '@/pages/customer/FaqPage';
+import NotFoundPage from '@/pages/customer/NotFoundPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
 import ProfilePage from '@/pages/customer/account/ProfilePage';
@@ -64,8 +67,8 @@ const routes: RouteObject[] = [
       { path: 'product/:slug', element: <ProductDetailPage /> },
       { path: 'cart', element: <CartPage /> },
       { path: 'support', element: ph('C-14', 'AI Support', 'Phase 9.3') },
-      { path: 'about', element: ph('C-15', 'About Us', 'Phase 5.4') },
-      { path: 'faq', element: ph('C-16', 'FAQ', 'Phase 5.4') },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'faq', element: <FaqPage /> },
 
       // Authenticated customer area
       {
@@ -94,7 +97,7 @@ const routes: RouteObject[] = [
       },
 
       // 404 catch-all (within customer chrome)
-      { path: '*', element: ph('C-18', 'Page Not Found', 'Phase 5.4', 'This page does not exist.') },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 
