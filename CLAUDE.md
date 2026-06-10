@@ -333,13 +333,29 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 5 — Cart & Checkout
-CURRENT SUBPHASE: 5.3 — Order Placement
+CURRENT SUBPHASE: 5.4 — About / FAQ / 404 pages
 
 Phase 5 Progress:
   5.1 Cart Store & Cart Drawer           [x] Done (drawer + /cart page, verified)
   5.2 Checkout Flow                      [x] Done (3-step stepper, verified)
-  5.3 Order Placement                    [ ] Next
-  5.4 About / FAQ / 404 pages            [ ] Not Started
+  5.3 Order Placement                    [x] Done (createOrder + confirmation, verified)
+  5.4 About / FAQ / 404 pages            [ ] Next
+
+Notes (5.3):
+  - order.service.createOrder: $transaction (validate stock, create Order+items+
+    Payment, DEDUCT variant stock, clear cart) -> then email + notify (customer +
+    ADMINISTRATOR). getOrderById (owner-scoped; staff can view any).
+  - IMPORTANT: $transaction needs { maxWait:10s, timeout:20s } — Neon network
+    latency blows the default 5s interactive-tx timeout (multi-query order).
+  - Payment record created with status PENDING (COD + card/wallet); real gateway
+    processing is Phase 10. COD is the only fully-working method right now.
+  - Routes: POST /orders, GET /orders/:id (authenticated). order numbers
+    IND-YYYYMMDD-XXXXXX (unique, retry on collision).
+  - Frontend: CheckoutPage Place Order -> createOrder mutation -> clearGuest +
+    invalidate cart -> navigate /order-confirmation/:id. OrderConfirmationPage
+    (C-07): framer confetti + drawn checkmark, order #, ETA(+5d), items, total.
+  - Verified live: full UI flow places order IND-..., stock 5->3, cart cleared,
+    confirmation renders; + API test (stock deduction, empty-cart 400).
 
 Notes (5.2):
   - CheckoutPage (/checkout): 3-step stepper (Delivery/Payment/Review). Step 1

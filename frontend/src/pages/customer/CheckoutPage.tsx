@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   MapPin, Plus, CreditCard, Wallet, Banknote, Truck, Zap, Lock, Pencil,
 } from 'lucide-react';
@@ -9,11 +9,14 @@ import { APP_NAME } from '@/lib/constants';
 import type { PaymentMethod } from '@/types/order.types';
 import type { Address } from '@/types/user.types';
 import { useCart } from '@/hooks/useCart';
+import { useCartStore } from '@/stores/cartStore';
 import { getAddresses } from '@/lib/api/account.api';
+import { createOrder } from '@/lib/api/order.api';
 import { computeShipping } from '@/components/cart/OrderSummary';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
 import { AddressForm } from '@/components/account/AddressForm';
 import { toast } from '@/lib/toast';
+import { getApiError } from '@/lib/apiError';
 import { Button } from '@/components/ui/button';
 
 const STEPS = ['Delivery', 'Payment', 'Review'];
@@ -28,6 +31,8 @@ const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: typeof CreditCa
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const clearGuest = useCartStore((s) => s.clearGuest);
   const { items, count, subtotal } = useCart();
 
   const [step, setStep] = useState(1);
@@ -56,6 +61,16 @@ export default function CheckoutPage() {
   const deliveryFee = deliveryType === 'express' ? EXPRESS_FEE : computeShipping(subtotal);
   const total = subtotal + deliveryFee;
 
+  const orderMutation = useMutation({
+    mutationFn: createOrder,
+    onSuccess: (order) => {
+      clearGuest();
+      void qc.invalidateQueries({ queryKey: ['cart'] });
+      navigate(`/order-confirmation/${order.id}`, { replace: true });
+    },
+    onError: (e) => toast.error(getApiError(e).message),
+  });
+
   if (items.length === 0) {
     return (
       <div className="container flex flex-col items-center gap-4 py-24 text-center">
@@ -68,8 +83,12 @@ export default function CheckoutPage() {
 
   function placeOrder() {
     if (!agree) return toast.error('Please accept the terms to place your order.');
-    // Real order creation + confirmation lands in Subphase 5.3.
-    toast.info('Order placement is wired up in the next step.');
+    if (!selectedAddressId) return toast.error('Please select a delivery address.');
+    orderMutation.mutate({
+      addressId: selectedAddressId,
+      deliveryType,
+      paymentMethod: payment,
+    });
   }
 
   return (
@@ -251,8 +270,10 @@ export default function CheckoutPage() {
               </label>
 
               <div className="flex justify-between">
-                <Button size="lg" variant="outline" onClick={() => setStep(2)}>Back</Button>
-                <Button size="lg" onClick={placeOrder}>Place Order · {formatPrice(total)}</Button>
+                <Button size="lg" variant="outline" onClick={() => setStep(2)} disabled={orderMutation.isPending}>Back</Button>
+                <Button size="lg" onClick={placeOrder} disabled={orderMutation.isPending}>
+                  {orderMutation.isPending ? 'Placing order…' : `Place Order · ${formatPrice(total)}`}
+                </Button>
               </div>
             </div>
           )}

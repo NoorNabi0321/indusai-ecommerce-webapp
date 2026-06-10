@@ -16,6 +16,7 @@ import ProductListingPage from '@/pages/customer/ProductListingPage';
 import ProductDetailPage from '@/pages/customer/ProductDetailPage';
 import CartPage from '@/pages/customer/CartPage';
 import CheckoutPage from '@/pages/customer/CheckoutPage';
+import OrderConfirmationPage from '@/pages/customer/OrderConfirmationPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
 import ProfilePage from '@/pages/customer/account/ProfilePage';
@@ -71,10 +72,7 @@ const routes: RouteObject[] = [
         element: <ProtectedRoute />,
         children: [
           { path: 'checkout', element: <CheckoutPage /> },
-          {
-            path: 'order-confirmation/:orderId',
-            element: ph('C-07', 'Order Confirmation', 'Phase 5.3'),
-          },
+          { path: 'order-confirmation/:orderId', element: <OrderConfirmationPage /> },
           { path: 'account/returns/new', element: ph('C-17', 'Request a Return', 'Phase 6.3') },
 
           // Account dashboard (sidebar layout)

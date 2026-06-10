@@ -11,6 +11,7 @@ import { wishlistRouter } from './wishlist.routes';
 import { userRouter } from './user.routes';
 import { addressRouter } from './address.routes';
 import { notificationRouter } from './notification.routes';
+import { orderRouter } from './order.routes';
 
 /**
  * Root API router, mounted at `/api`. Feature routers are added here as their
@@ -30,3 +31,4 @@ apiRouter.use('/wishlist', wishlistRouter);
 apiRouter.use('/users', userRouter);
 apiRouter.use('/addresses', addressRouter);
 apiRouter.use('/notifications', notificationRouter);
+apiRouter.use('/orders', orderRouter);
