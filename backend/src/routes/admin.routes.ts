@@ -12,11 +12,15 @@ import {
 import { updateOrderStatusSchema } from '../validation/order.validation';
 import * as ctrl from '../controllers/admin-product.controller';
 import * as orderCtrl from '../controllers/admin-order.controller';
+import { adminDashboard } from '../controllers/dashboard.controller';
 
 export const adminRouter = Router();
 
 // All admin routes require an authenticated Administrator or Owner.
 adminRouter.use(authenticate, requireRole('ADMINISTRATOR', 'OWNER'));
+
+// Dashboard
+adminRouter.get('/dashboard', adminDashboard);
 
 // Orders
 adminRouter.get('/orders', orderCtrl.listAllOrders);

@@ -20,6 +20,7 @@ import OrderConfirmationPage from '@/pages/customer/OrderConfirmationPage';
 import AboutPage from '@/pages/customer/AboutPage';
 import FaqPage from '@/pages/customer/FaqPage';
 import NotFoundPage from '@/pages/customer/NotFoundPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
@@ -111,8 +112,8 @@ const routes: RouteObject[] = [
         path: '/admin',
         element: <AdminLayout />,
         children: [
-          { index: true, element: ph('AD-01', 'Admin Dashboard', 'Phase 7.1') },
-          { path: 'dashboard', element: ph('AD-01', 'Admin Dashboard', 'Phase 7.1') },
+          { index: true, element: <AdminDashboardPage /> },
+          { path: 'dashboard', element: <AdminDashboardPage /> },
           { path: 'products', element: ph('AD-02', 'Product Management', 'Phase 7.2') },
           { path: 'products/new', element: ph('AD-03', 'Add Product', 'Phase 7.2') },
           { path: 'products/:id/edit', element: ph('AD-03', 'Edit Product', 'Phase 7.2') },

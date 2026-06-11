@@ -333,7 +333,25 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 7 — Admin Panel
-CURRENT SUBPHASE: 7.1 — Admin Dashboard
+CURRENT SUBPHASE: 7.2 — Product Management UI
+
+Phase 7 Progress:
+  7.1 Admin Dashboard                    [x] Done (metrics+charts+recent; verified)
+  7.2 Product Management UI              [ ] Next
+  7.3 Customer Management                [ ] Not Started
+  7.4 Inventory Alerts                   [ ] Not Started
+  7.5 Admin Notifications & Settings     [ ] Not Started
+
+Notes (7.1):
+  - dashboard.service.getAdminDashboard(role, days): metrics (ordersToday,
+    revenueToday [OWNER-only, null for ADMIN per RBAC], pendingOrders,
+    lowStockCount<=5), salesSeries (per-day buckets, revenue owner-only),
+    categoryBreakdown (units/category), topProducts (groupBy qty), recentOrders
+    (last 10), pendingDeletions. GET /api/admin/dashboard?days=7|30.
+  - Frontend: AdminDashboardPage (4 metric cards; revenue card shows "Owner only"
+    lock when null), SalesChart + CategoryDonut (Recharts), recent orders table,
+    top products. Charts: components/charts/*.
+  - Recharts is heavy -> Vite re-optimizes on first load (full reload); settles.
 
 Phase 6 — COMPLETE:
   6.1 Customer Order History & Tracking  [x] Done (list + timeline, verified)
