@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { UserRole } from '@prisma/client';
+import { Prisma, type UserRole } from '@prisma/client';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/AppError';
 import { uploadImageBuffer, deleteImage, isCloudinaryConfigured } from '../config/cloudinary';
@@ -43,6 +43,75 @@ async function fetchAndSerialize(id: string) {
     where: { id },
     include: PRODUCT_INCLUDE,
   });
+  return mapProduct(product);
+}
+
+// ───────────────────── Admin list + detail (all products) ────────────────
+
+export async function listAdminProducts(opts: {
+  search?: string;
+  categoryId?: string;
+  status?: 'active' | 'inactive' | 'pending';
+  page?: number;
+  limit?: number;
+}) {
+  const page = opts.page ?? 1;
+  const limit = opts.limit ?? 20;
+  const where: Prisma.ProductWhereInput = {};
+
+  if (opts.categoryId) where.categoryId = opts.categoryId;
+  if (opts.status === 'active') where.isActive = true;
+  else if (opts.status === 'inactive') where.isActive = false;
+  else if (opts.status === 'pending') where.deletionRequest = { status: 'PENDING' };
+  if (opts.search) {
+    where.OR = [
+      { name: { contains: opts.search, mode: 'insensitive' } },
+      { brand: { contains: opts.search, mode: 'insensitive' } },
+      { variants: { some: { sku: { contains: opts.search, mode: 'insensitive' } } } },
+    ];
+  }
+
+  const [total, products] = await Promise.all([
+    prisma.product.count({ where }),
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        category: { select: { name: true } },
+        images: { where: { isMain: true }, take: 1 },
+        variants: { select: { stock: true, sku: true } },
+        deletionRequest: { select: { status: true } },
+      },
+    }),
+  ]);
+
+  const items = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    category: p.category.name,
+    image: p.images[0]?.url ?? null,
+    basePrice: Number(p.basePrice),
+    comparePrice: p.comparePrice != null ? Number(p.comparePrice) : null,
+    isActive: p.isActive,
+    isFeatured: p.isFeatured,
+    sku: p.variants[0]?.sku ?? '—',
+    variantCount: p.variants.length,
+    totalStock: p.variants.reduce((s, v) => s + v.stock, 0),
+    deletionStatus: p.deletionRequest?.status ?? null,
+  }));
+
+  return {
+    items,
+    pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+  };
+}
+
+export async function getAdminProductById(id: string) {
+  const product = await prisma.product.findUnique({ where: { id }, include: PRODUCT_INCLUDE });
+  if (!product) throw AppError.notFound('Product not found.');
   return mapProduct(product);
 }
 

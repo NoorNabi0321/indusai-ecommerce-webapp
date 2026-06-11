@@ -116,6 +116,11 @@
     @apply bg-gradient-to-r from-gold-glow via-gold-base to-gold-dim bg-clip-text text-transparent;
   }
 
+  /* Shared form input (admin forms) */
+  .input {
+    @apply h-10 w-full rounded-md border border-input bg-bg-base px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-gold-dim;
+  }
+
   /* Dual range slider thumbs (overlaid inputs; only thumbs are interactive) */
   .range-input {
     -webkit-appearance: none;

@@ -333,12 +333,26 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 7 — Admin Panel
-CURRENT SUBPHASE: 7.2 — Product Management UI
+CURRENT SUBPHASE: 7.3 — Customer Management
 
 Phase 7 Progress:
   7.1 Admin Dashboard                    [x] Done (metrics+charts+recent; verified)
-  7.2 Product Management UI              [ ] Next
-  7.3 Customer Management                [ ] Not Started
+  7.2 Product Management UI              [x] Done (table + add/edit form; verified)
+  7.3 Customer Management                [ ] Next
+
+Notes (7.2):
+  - Backend: GET /admin/products (listAdminProducts: search/category/status
+    [active|inactive|pending] + pagination; returns totalStock, sku, variantCount,
+    deletionStatus) + GET /admin/products/:id (full, by id incl. inactive).
+    Create/update/toggle/images/request-delete were built in 3.2.
+  - Frontend: AdminProductsPage (table: stock color-coded, status, edit/toggle/
+    request-delete modal), AdminProductFormPage (RHF scalars + variants state +
+    ImageManager). NEW product -> create -> redirect to /edit (images attach to
+    an existing id). Existing variants editable not removable (order FK).
+  - Added .input utility class in globals.css for admin forms.
+  - Verified live: list (20 rows, stock colors), edit form populates + SAVE
+    persists (basePrice 6499->6799). Image upload UI not driven in harness
+    (Cloudinary upload verified in 3.2).
   7.4 Inventory Alerts                   [ ] Not Started
   7.5 Admin Notifications & Settings     [ ] Not Started
 

@@ -7,6 +7,27 @@ function actorFrom(req: Request): Actor {
   return { id: req.user!.id, role: req.user!.role, ip: req.ip };
 }
 
+// GET /api/admin/products
+export const listProducts = asyncHandler(async (req: Request, res: Response) => {
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const limit = req.query.limit ? Number(req.query.limit) : 20;
+  const search = (req.query.search as string | undefined)?.trim() || undefined;
+  const categoryId = (req.query.categoryId as string | undefined) || undefined;
+  const statusParam = req.query.status as string | undefined;
+  const status = ['active', 'inactive', 'pending'].includes(statusParam ?? '')
+    ? (statusParam as 'active' | 'inactive' | 'pending')
+    : undefined;
+
+  const { items, pagination } = await adminProductService.listAdminProducts({ search, categoryId, status, page, limit });
+  res.json({ success: true, data: items, pagination });
+});
+
+// GET /api/admin/products/:id
+export const getProduct = asyncHandler(async (req: Request, res: Response) => {
+  const product = await adminProductService.getAdminProductById(req.params.id);
+  res.json({ success: true, data: product });
+});
+
 // POST /api/admin/products
 export const createProduct = asyncHandler(async (req: Request, res: Response) => {
   const product = await adminProductService.createProduct(actorFrom(req), req.body);

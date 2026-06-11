@@ -26,6 +26,8 @@ adminRouter.get('/dashboard', adminDashboard);
 adminRouter.get('/orders', orderCtrl.listAllOrders);
 adminRouter.patch('/orders/:id/status', validate({ body: updateOrderStatusSchema }), orderCtrl.updateOrderStatus);
 
+adminRouter.get('/products', ctrl.listProducts);
+adminRouter.get('/products/:id', ctrl.getProduct);
 adminRouter.post('/products', validate({ body: createProductSchema }), ctrl.createProduct);
 adminRouter.put('/products/:id', validate({ body: updateProductSchema }), ctrl.updateProduct);
 adminRouter.patch('/products/:id/status', validate({ body: toggleStatusSchema }), ctrl.toggleStatus);

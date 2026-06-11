@@ -21,6 +21,8 @@ import AboutPage from '@/pages/customer/AboutPage';
 import FaqPage from '@/pages/customer/FaqPage';
 import NotFoundPage from '@/pages/customer/NotFoundPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminProductsPage from '@/pages/admin/AdminProductsPage';
+import AdminProductFormPage from '@/pages/admin/AdminProductFormPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
@@ -114,13 +116,9 @@ const routes: RouteObject[] = [
         children: [
           { index: true, element: <AdminDashboardPage /> },
           { path: 'dashboard', element: <AdminDashboardPage /> },
-          { path: 'products', element: ph('AD-02', 'Product Management', 'Phase 7.2') },
-          { path: 'products/new', element: ph('AD-03', 'Add Product', 'Phase 7.2') },
-          { path: 'products/:id/edit', element: ph('AD-03', 'Edit Product', 'Phase 7.2') },
-          {
-            path: 'products/:id/request-delete',
-            element: ph('AD-12', 'Request Deletion', 'Phase 7.2'),
-          },
+          { path: 'products', element: <AdminProductsPage /> },
+          { path: 'products/new', element: <AdminProductFormPage /> },
+          { path: 'products/:id/edit', element: <AdminProductFormPage /> },
           { path: 'orders', element: <AdminOrdersPage /> },
           { path: 'orders/:orderId', element: <AdminOrderDetailPage /> },
           { path: 'customers', element: ph('AD-06', 'Customer Management', 'Phase 7.3') },
