@@ -332,8 +332,45 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 7 — Admin Panel — COMPLETE
-CURRENT SUBPHASE: 7.6 — AI Chatbot Widget (deferred to Phase 9; needs OpenAI)
+CURRENT PHASE: Phase 8 — Owner Panel
+CURRENT SUBPHASE: 8.2 — Owner Analytics & Sales Predictions (needs TensorFlow.js)
+
+Phase 8 Progress:
+  8.1 Owner Dashboard & Financial Stats  [x] Done (8 cards+charts+financials; verified)
+  8.2 Owner Analytics & Sales Predictions[ ] Next (TensorFlow.js forecast)
+  8.3 User Management & Deletion Approvals[ ] Not Started
+  8.4 System Config & Audit Log          [ ] Not Started
+
+Notes (8.1):
+  - HONEST FINANCIALS: schema has NO cost-of-goods field, so profit/expenses are
+    NOT fabricated. Money is realised from the Payment ledger: PAID=revenue,
+    REFUNDED=refund. Reported as gross / refunds / net (all real).
+  - Backend: finance.service.getOwnerDashboard(days 7|30|90) — 8 metrics
+    (gross/net/refunds/totalOrders/paidOrders/AOV/newCustomers/shipping),
+    financialSeries (per-day gross/refunds/net from Payment.createdAt buckets),
+    paymentBreakdown (groupBy method, PAID), pendingActions (orders/deletions/
+    lowStock/returns), recentActivity (last 10 AuditLog w/ actor name).
+    getOwnerFinancials({from,to}) — summary, revenueSeries, paymentMethods
+    (orders+revenue), productPerformance (top 10 by realised OrderItem revenue,
+    PAID orders). finance.controller + GET /owner/dashboard, /owner/financials.
+  - Frontend: lib/api/finance.api; charts/FinancialChart (3-line gross/net/
+    refunds) + charts/PaymentDonut (method amounts). OwnerDashboardPage (8 cards
+    2 rows + 7/30/90 toggle, financial chart, payment donut, pending-actions
+    panel w/ deep links, staff activity feed). OwnerFinancialsPage (date range
+    pickers, 4 summary cards, revenue chart, payment-method table, product-
+    performance table, client-side CSV export for both tables). Owner nav links
+    already existed (OWNER_NAV).
+  - Verified live (owner): dashboard 8 cards (gross/net Rs 6,499, 1 paid order,
+    AOV 6,499, 1 new customer); financial multi-line chart + COD donut render;
+    financials page tables (COD 1/Rs6,499; Mechanical Keyboard 1u/Rs6,499);
+    date-range refetch fires (from=2026-05-20 -> 200); past range (Jan 2026) =>
+    all zeros; 90d dashboard gross 6,499. Console clean. Screenshots worked this
+    session.
+  - NOTE: financialSeries buckets revenue by Payment.createdAt (~order date),
+    not the date status flipped to PAID — fine for an order-date revenue chart.
+
+Phase 7 — COMPLETE:
+  7.6 AI Chatbot Widget deferred to Phase 9 (OpenAI dep).
 
 Phase 7 Progress:
   7.1 Admin Dashboard                    [x] Done (metrics+charts+recent; verified)

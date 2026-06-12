@@ -128,6 +128,16 @@ Stock alert tiers (per variant): **critical** ≤ 2, **low** ≤ 5, **moderate**
 | PATCH | `/admin/inventory/variants/:id` | `{ stock }` | Inline quick-edit — sets absolute stock. Audit `STOCK_UPDATE`. |
 | POST | `/admin/inventory/bulk` | `{ updates: [{ sku, stock }] }` | Batch update by SKU (CSV import; ≤1000 rows). Returns `{ updated, notFound[] }`. Audit `STOCK_BULK_UPDATE`. |
 
+## Owner Financials — `/api/owner` (Owner only)
+
+Money is realised from the Payment ledger: `PAID` = revenue, `REFUNDED` = refund.
+The schema has no cost-of-goods field, so profit/margin is intentionally not computed.
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/owner/dashboard` | Owner financial dashboard. Query `days` (7\|30\|90, default 30). Returns 8 metrics (gross/net/refunds/orders/paidOrders/AOV/newCustomers/shipping), `financialSeries` (per-day gross/refunds/net), `paymentBreakdown`, `pendingActions`, and `recentActivity` (staff audit log). |
+| GET | `/owner/financials` | Detailed range report. Query `from`, `to` (ISO dates; default last 30d). Returns `summary`, `revenueSeries`, `paymentMethods` (orders+revenue), and `productPerformance` (top 10 by realised revenue). |
+
 ## Owner Products — `/api/owner` (Owner only)
 
 | Method | Path | Notes |

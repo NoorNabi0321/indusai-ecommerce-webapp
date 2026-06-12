@@ -30,6 +30,8 @@ import AdminCustomerDetailPage from '@/pages/admin/AdminCustomerDetailPage';
 import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
 import AdminNotificationsPage from '@/pages/admin/AdminNotificationsPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+import OwnerDashboardPage from '@/pages/owner/OwnerDashboardPage';
+import OwnerFinancialsPage from '@/pages/owner/OwnerFinancialsPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
@@ -146,9 +148,9 @@ const routes: RouteObject[] = [
         path: '/owner',
         element: <OwnerLayout />,
         children: [
-          { index: true, element: ph('OW-01', 'Owner Dashboard', 'Phase 8.1') },
-          { path: 'dashboard', element: ph('OW-01', 'Owner Dashboard', 'Phase 8.1') },
-          { path: 'financials', element: ph('OW-02', 'Financial Statistics', 'Phase 8.1') },
+          { index: true, element: <OwnerDashboardPage /> },
+          { path: 'dashboard', element: <OwnerDashboardPage /> },
+          { path: 'financials', element: <OwnerFinancialsPage /> },
           { path: 'analytics', element: ph('OW-03', 'Sales Analytics', 'Phase 8.2') },
           { path: 'users', element: ph('OW-04', 'User Management', 'Phase 8.3') },
           { path: 'deletions', element: ph('OW-05', 'Deletion Approvals', 'Phase 8.3') },
