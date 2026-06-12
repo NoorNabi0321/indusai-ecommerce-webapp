@@ -333,13 +333,37 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 8 — Owner Panel
-CURRENT SUBPHASE: 8.2 — Owner Analytics & Sales Predictions (needs TensorFlow.js)
+CURRENT SUBPHASE: 8.3 — User Management & Deletion Approvals
 
 Phase 8 Progress:
   8.1 Owner Dashboard & Financial Stats  [x] Done (8 cards+charts+financials; verified)
-  8.2 Owner Analytics & Sales Predictions[ ] Next (TensorFlow.js forecast)
-  8.3 User Management & Deletion Approvals[ ] Not Started
+  8.2 Owner Analytics & Sales Predictions[x] Done (TF.js forecast+4 charts; verified)
+  8.3 User Management & Deletion Approvals[ ] Next
   8.4 System Config & Audit Log          [ ] Not Started
+
+Notes (8.2):
+  - TensorFlow.js: installed PURE-JS @tensorflow/tfjs (NOT tfjs-node — avoids
+    Windows native build; CPU backend, fine for this size). Smoke-tested: recovers
+    y=2x+1. The "install tfjs-node for speed" log is a hint, not an error.
+  - forecast.service.forecastSeries(daily, horizon=7): trains y=a*x+b via a real
+    tf.train.adam loop (300 iters) on a normalised daily series, projects 7 days.
+    HONEST CONFIDENCE: derived from R^2 + data volume; sufficient=false when
+    n<14 or nonZeroDays<5 -> confidence floored low. Never a confident number on
+    1-2 points. Disposes tensors.
+  - analytics.service.getOwnerAnalytics(days 30|90|180): forecast (daily order
+    volume) + salesByCategory (units+revenue) + customerAcquisition (weekly
+    verified/unverified) + heatmap (weekday×hour order counts) + funnel
+    (registered->cart->ordered->delivered, from REAL tracked DB state, NOT
+    page-view analytics we don't collect). GET /owner/analytics.
+  - Frontend: lib/api/analytics.api; OwnerAnalyticsPage — AI forecast panel
+    (TF.js badge, predicted next-7d total, trend arrow, confidence badge,
+    insufficient-data warning, actual+dashed-forecast line chart), category
+    horizontal bar, acquisition stacked bar (Recharts), custom 7×24 heatmap
+    (rgba-gold intensity cells), custom funnel (proportional bars + conv %).
+  - Verified live (owner): all 5 sections render; forecast = Low confidence 1%,
+    insufficient warning (1 active day), predicted 0 / -100% down (honest);
+    category Electronics Rs6,499; funnel 1/0/1/1; heatmap 1 cell Wed ~11:00;
+    13 acquisition weeks. TF.js trained w/o error. Console clean; screenshots ok.
 
 Notes (8.1):
   - HONEST FINANCIALS: schema has NO cost-of-goods field, so profit/expenses are

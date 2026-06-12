@@ -32,6 +32,7 @@ import AdminNotificationsPage from '@/pages/admin/AdminNotificationsPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
 import OwnerDashboardPage from '@/pages/owner/OwnerDashboardPage';
 import OwnerFinancialsPage from '@/pages/owner/OwnerFinancialsPage';
+import OwnerAnalyticsPage from '@/pages/owner/OwnerAnalyticsPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
@@ -151,7 +152,7 @@ const routes: RouteObject[] = [
           { index: true, element: <OwnerDashboardPage /> },
           { path: 'dashboard', element: <OwnerDashboardPage /> },
           { path: 'financials', element: <OwnerFinancialsPage /> },
-          { path: 'analytics', element: ph('OW-03', 'Sales Analytics', 'Phase 8.2') },
+          { path: 'analytics', element: <OwnerAnalyticsPage /> },
           { path: 'users', element: ph('OW-04', 'User Management', 'Phase 8.3') },
           { path: 'deletions', element: ph('OW-05', 'Deletion Approvals', 'Phase 8.3') },
           { path: 'config', element: ph('OW-06', 'System Configuration', 'Phase 8.4') },

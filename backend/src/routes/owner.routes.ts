@@ -12,6 +12,7 @@ ownerRouter.use(authenticate, requireRole('OWNER'));
 // Financial dashboard + reporting (Owner-only)
 ownerRouter.get('/dashboard', financeCtrl.ownerDashboard);
 ownerRouter.get('/financials', financeCtrl.ownerFinancials);
+ownerRouter.get('/analytics', financeCtrl.ownerAnalytics);
 
 ownerRouter.post('/products/:id/approve-delete', ctrl.approveDeletion);
 ownerRouter.post('/products/:id/reject-delete', ctrl.rejectDeletion);

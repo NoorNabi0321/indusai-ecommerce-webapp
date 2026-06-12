@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler';
 import * as financeService from '../services/finance.service';
+import { getOwnerAnalytics } from '../services/analytics.service';
 
 // GET /api/owner/dashboard?days=7|30
 export const ownerDashboard = asyncHandler(async (req: Request, res: Response) => {
@@ -20,5 +21,13 @@ export const ownerFinancials = asyncHandler(async (req: Request, res: Response) 
     from: from && !Number.isNaN(from.getTime()) ? from : undefined,
     to: to && !Number.isNaN(to.getTime()) ? to : undefined,
   });
+  res.json({ success: true, data });
+});
+
+// GET /api/owner/analytics?days=30|90
+export const ownerAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  const days = req.query.days ? Number(req.query.days) : 90;
+  const safeDays = [30, 90, 180].includes(days) ? days : 90;
+  const data = await getOwnerAnalytics(safeDays);
   res.json({ success: true, data });
 });

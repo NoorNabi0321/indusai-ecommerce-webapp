@@ -24,6 +24,7 @@
     "@prisma/client": "^6.1.0",
     "@sendgrid/mail": "^8.1.4",
     "@sentry/node": "^8.47.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",

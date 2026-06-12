@@ -137,6 +137,7 @@ The schema has no cost-of-goods field, so profit/margin is intentionally not com
 |--------|------|-------|
 | GET | `/owner/dashboard` | Owner financial dashboard. Query `days` (7\|30\|90, default 30). Returns 8 metrics (gross/net/refunds/orders/paidOrders/AOV/newCustomers/shipping), `financialSeries` (per-day gross/refunds/net), `paymentBreakdown`, `pendingActions`, and `recentActivity` (staff audit log). |
 | GET | `/owner/financials` | Detailed range report. Query `from`, `to` (ISO dates; default last 30d). Returns `summary`, `revenueSeries`, `paymentMethods` (orders+revenue), and `productPerformance` (top 10 by realised revenue). |
+| GET | `/owner/analytics` | Sales analytics. Query `days` (30\|90\|180, default 90). Returns a TensorFlow.js `forecast` (linear-trend model over daily order volume → 7-day projection with `confidence`/`trend`/`sufficient` flags), `salesByCategory`, weekly `customerAcquisition` (verified/unverified), an order `heatmap` (weekday×hour), and a `funnel` (registered→cart→ordered→delivered, from tracked events only). |
 
 ## Owner Products — `/api/owner` (Owner only)
 
