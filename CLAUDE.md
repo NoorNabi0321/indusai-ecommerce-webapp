@@ -333,12 +333,35 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 7 — Admin Panel
-CURRENT SUBPHASE: 7.4 — Inventory Alerts
+CURRENT SUBPHASE: 7.5 — Admin Notifications & Settings
 
 Phase 7 Progress:
   7.1 Admin Dashboard                    [x] Done (metrics+charts+recent; verified)
   7.2 Product Management UI              [x] Done (table + add/edit form; verified)
   7.3 Customer Management                [x] Done (list + profile + suspend; verified)
+  7.4 Inventory Alerts                   [x] Done (alerts+inline edit+CSV; verified)
+
+Notes (7.4):
+  - Backend: inventory.service — alert tiers per VARIANT stock: critical<=2,
+    low<=5, moderate<=10, else healthy (STOCK_THRESHOLDS + alertLevel()).
+    listInventory (default = alert-only stock<=10; level/includeHealthy/search;
+    meta.summary critical/low/moderate counts; ordered stock asc).
+    updateVariantStock (absolute set; audit STOCK_UPDATE). bulkUpdateStock
+    (by SKU, $transaction, dedupe last-wins, returns {updated,notFound[]};
+    audit STOCK_BULK_UPDATE). inventory.controller + validation (bulk<=1000).
+  - Routes: GET /admin/inventory, PATCH /admin/inventory/variants/:id,
+    POST /admin/inventory/bulk.
+  - Frontend: lib/api/inventory.api; AdminInventoryPage — clickable summary
+    cards + level tabs (All Alerts/Critical/Low/Moderate/All Products) + search;
+    table with INLINE stock quick-edit (dirty -> gold save btn, Enter saves) +
+    level badges + product link. CSV Import via papaparse (header sku,stock;
+    case-insensitive; validates headers + rows) -> bulk endpoint; Template
+    download (Papa.unparse current rows). Added papaparse + @types/papaparse.
+  - Verified live (owner): list = 29 alerts (summary 7/11/11), ordered stock
+    asc; inline edit speaker 0->30 -> save -> drops out of alerts (healthy);
+    PATCH + bulk (2 updated, 1 not-found) via API; seed values restored.
+    NOTE: preview_screenshot returned stale/blank frames this session — verified
+    via DOM eval + backend 200s instead (page DOM confirmed populated).
 
 Notes (7.3):
   - Backend: customer.service (listCustomers: search name/email + status
@@ -372,7 +395,6 @@ Notes (7.2):
   - Verified live: list (20 rows, stock colors), edit form populates + SAVE
     persists (basePrice 6499->6799). Image upload UI not driven in harness
     (Cloudinary upload verified in 3.2).
-  7.4 Inventory Alerts                   [ ] Not Started
   7.5 Admin Notifications & Settings     [ ] Not Started
 
 Notes (7.1):

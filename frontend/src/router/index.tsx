@@ -27,6 +27,7 @@ import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
 import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
 import AdminCustomerDetailPage from '@/pages/admin/AdminCustomerDetailPage';
+import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
@@ -125,7 +126,7 @@ const routes: RouteObject[] = [
           { path: 'orders/:orderId', element: <AdminOrderDetailPage /> },
           { path: 'customers', element: <AdminCustomersPage /> },
           { path: 'customers/:customerId', element: <AdminCustomerDetailPage /> },
-          { path: 'inventory', element: ph('AD-09', 'Inventory Alerts', 'Phase 7.4') },
+          { path: 'inventory', element: <AdminInventoryPage /> },
           { path: 'reports', element: ph('AD-08', 'Reports', 'Phase 12') },
           { path: 'notifications', element: ph('AD-10', 'Notifications', 'Phase 7.5') },
           { path: 'settings', element: ph('AD-11', 'Account Settings', 'Phase 7.5') },

@@ -109,6 +109,16 @@ Create/variant body:
 | GET | `/admin/customers/:id` | – | Full profile: addresses, order history (summaries), and `stats` (totalOrders/totalSpent). 404 for non-customers. |
 | PATCH | `/admin/customers/:id/status` | `{ isActive }` | Activate / suspend. Suspending revokes all refresh tokens (forces logout). Audit `CUSTOMER_SUSPEND` / `CUSTOMER_ACTIVATE`. |
 
+## Admin Inventory — `/api/admin/inventory` (Administrator or Owner)
+
+Stock alert tiers (per variant): **critical** ≤ 2, **low** ≤ 5, **moderate** ≤ 10, else healthy.
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| GET | `/admin/inventory` | – | Lists variants needing attention (stock ≤ 10) by default. Query: `level` (`critical`\|`low`\|`moderate`), `includeHealthy` (`true` for full catalogue), `search` (product name/SKU), `page`, `limit`. `meta.summary` has critical/low/moderate counts. Ordered by stock asc. |
+| PATCH | `/admin/inventory/variants/:id` | `{ stock }` | Inline quick-edit — sets absolute stock. Audit `STOCK_UPDATE`. |
+| POST | `/admin/inventory/bulk` | `{ updates: [{ sku, stock }] }` | Batch update by SKU (CSV import; ≤1000 rows). Returns `{ updated, notFound[] }`. Audit `STOCK_BULK_UPDATE`. |
+
 ## Owner Products — `/api/owner` (Owner only)
 
 | Method | Path | Notes |

@@ -11,9 +11,11 @@ import {
 } from '../validation/admin-product.validation';
 import { updateOrderStatusSchema } from '../validation/order.validation';
 import { setCustomerStatusSchema } from '../validation/customer.validation';
+import { updateStockSchema, bulkUpdateStockSchema } from '../validation/inventory.validation';
 import * as ctrl from '../controllers/admin-product.controller';
 import * as orderCtrl from '../controllers/admin-order.controller';
 import * as customerCtrl from '../controllers/customer.controller';
+import * as inventoryCtrl from '../controllers/inventory.controller';
 import { adminDashboard } from '../controllers/dashboard.controller';
 
 export const adminRouter = Router();
@@ -32,6 +34,11 @@ adminRouter.patch('/orders/:id/status', validate({ body: updateOrderStatusSchema
 adminRouter.get('/customers', customerCtrl.listCustomers);
 adminRouter.get('/customers/:id', customerCtrl.getCustomer);
 adminRouter.patch('/customers/:id/status', validate({ body: setCustomerStatusSchema }), customerCtrl.setCustomerStatus);
+
+// Inventory
+adminRouter.get('/inventory', inventoryCtrl.listInventory);
+adminRouter.post('/inventory/bulk', validate({ body: bulkUpdateStockSchema }), inventoryCtrl.bulkUpdateStock);
+adminRouter.patch('/inventory/variants/:id', validate({ body: updateStockSchema }), inventoryCtrl.updateVariantStock);
 
 adminRouter.get('/products', ctrl.listProducts);
 adminRouter.get('/products/:id', ctrl.getProduct);
