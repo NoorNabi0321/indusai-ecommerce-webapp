@@ -333,13 +333,41 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 8 — Owner Panel
-CURRENT SUBPHASE: 8.3 — User Management & Deletion Approvals
+CURRENT SUBPHASE: 8.4 — System Config & Audit Log
 
 Phase 8 Progress:
   8.1 Owner Dashboard & Financial Stats  [x] Done (8 cards+charts+financials; verified)
   8.2 Owner Analytics & Sales Predictions[x] Done (TF.js forecast+4 charts; verified)
-  8.3 User Management & Deletion Approvals[ ] Next
-  8.4 System Config & Audit Log          [ ] Not Started
+  8.3 User Management & Deletion Approvals[x] Done (admins CRUD + approvals; verified)
+  8.4 System Config & Audit Log          [ ] Next
+
+Notes (8.3):
+  - Backend: user-management.service (OWNER). listAdmins (search/status,
+    productCount). createAdmin -> generates temp password (Indus-XXXX-xxxx9),
+    creates pre-verified+active ADMINISTRATOR, emails sendAdminWelcomeEmail
+    (best-effort) AND returns tempPassword once (sandbox email is restricted);
+    audit ADMIN_CREATE. setAdminStatus (suspend revokes refresh tokens).
+    deleteAdmin GUARDED: 409 if admin has products or auditLogs (suggests
+    suspend) — never orphans FKs / destroys audit trail; else tx-deletes
+    notifications+tokens+otp+user. listDeletionRequests (product preview +
+    requester/reviewer names resolved in one query; status pending|all).
+  - Routes (owner.routes): GET/POST /owner/admins, PATCH /admins/:id/status,
+    DELETE /admins/:id, GET /owner/deletions. approve/reject already existed
+    (POST /owner/products/:id/approve-delete | reject-delete, by product id).
+  - Frontend: lib/api/user-management.api. OwnerUserManagementPage (tabs
+    Administrators|Customers; admin table + Add modal [RHF -> create -> ONE-TIME
+    temp-password reveal w/ copy] + suspend/delete modals; Customers tab reuses
+    listCustomers -> /admin/customers/:id). OwnerDeletionApprovalsPage (Pending|
+    History tabs; request cards w/ product preview+reason+orderItem count;
+    approve modal requires typing EXACT product name to enable; reject inline).
+  - Verified live (owner): users page renders; create admin (201, temp pw
+    Indus-0DDD-Jz5m9, NEW ADMIN LOGS IN ok role ADMINISTRATOR); suspend 200;
+    delete-guard 409 (has LOGIN audit); happy-delete 200 (fresh admin no
+    history). Deletions: pending card renders; approve modal gating verified
+    (disabled -> wrong text disabled -> exact match ENABLED); approve archives
+    product (isActive false) + status APPROVED + reviewedBy + pending empties +
+    History tab shows it. Console clean. ALL TEST DATA CLEANED (0 admins, 0
+    deletion requests; product reactivated) via temp prisma script (removed).
 
 Notes (8.2):
   - TensorFlow.js: installed PURE-JS @tensorflow/tfjs (NOT tfjs-node — avoids

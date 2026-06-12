@@ -139,12 +139,22 @@ The schema has no cost-of-goods field, so profit/margin is intentionally not com
 | GET | `/owner/financials` | Detailed range report. Query `from`, `to` (ISO dates; default last 30d). Returns `summary`, `revenueSeries`, `paymentMethods` (orders+revenue), and `productPerformance` (top 10 by realised revenue). |
 | GET | `/owner/analytics` | Sales analytics. Query `days` (30\|90\|180, default 90). Returns a TensorFlow.js `forecast` (linear-trend model over daily order volume → 7-day projection with `confidence`/`trend`/`sufficient` flags), `salesByCategory`, weekly `customerAcquisition` (verified/unverified), an order `heatmap` (weekday×hour), and a `funnel` (registered→cart→ordered→delivered, from tracked events only). |
 
-## Owner Products — `/api/owner` (Owner only)
+## Owner User Management — `/api/owner` (Owner only)
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| GET | `/owner/admins` | – | Lists ADMINISTRATOR users. Query `search`, `status` (active\|suspended). Each row has `productCount`. |
+| POST | `/owner/admins` | `{ name, email, phone? }` | Creates a pre-verified admin with a generated temp password (emailed best-effort; also returned once as `tempPassword`). Audit `ADMIN_CREATE`. |
+| PATCH | `/owner/admins/:id/status` | `{ isActive }` | Suspend / activate. Suspend revokes refresh tokens. Audit `ADMIN_SUSPEND`/`ADMIN_ACTIVATE`. |
+| DELETE | `/owner/admins/:id` | – | Hard-delete — only if the admin has no products and no audit history (else 409: suspend instead). Audit `ADMIN_DELETE`. |
+
+## Owner Deletion Approvals — `/api/owner` (Owner only)
 
 | Method | Path | Notes |
 |--------|------|-------|
-| POST | `/owner/products/:id/approve-delete` | Archives product (`isActive=false`), marks request APPROVED, notifies requester. |
-| POST | `/owner/products/:id/reject-delete` | Marks request REJECTED, product stays active. |
+| GET | `/owner/deletions` | Lists DeletionRequests with product preview + requester/reviewer names. Query `status` (`pending` default \| `all`). |
+| POST | `/owner/products/:id/approve-delete` | Archives product (`isActive=false`), marks request APPROVED, notifies requester. Audit `PRODUCT_DELETE_APPROVE`. |
+| POST | `/owner/products/:id/reject-delete` | Marks request REJECTED, product stays active. Audit `PRODUCT_DELETE_REJECT`. |
 
 All admin/owner product mutations write an `AuditLog` entry (Owner-visible).
 

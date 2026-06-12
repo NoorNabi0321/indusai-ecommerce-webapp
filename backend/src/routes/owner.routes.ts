@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import { requireRole } from '../middleware/role.middleware';
+import { validate } from '../middleware/validate.middleware';
+import { createAdminSchema, setAdminStatusSchema } from '../validation/user-management.validation';
 import * as ctrl from '../controllers/admin-product.controller';
 import * as financeCtrl from '../controllers/finance.controller';
+import * as umsCtrl from '../controllers/user-management.controller';
 
 export const ownerRouter = Router();
 
@@ -14,5 +17,13 @@ ownerRouter.get('/dashboard', financeCtrl.ownerDashboard);
 ownerRouter.get('/financials', financeCtrl.ownerFinancials);
 ownerRouter.get('/analytics', financeCtrl.ownerAnalytics);
 
+// Administrator management
+ownerRouter.get('/admins', umsCtrl.listAdmins);
+ownerRouter.post('/admins', validate({ body: createAdminSchema }), umsCtrl.createAdmin);
+ownerRouter.patch('/admins/:id/status', validate({ body: setAdminStatusSchema }), umsCtrl.setAdminStatus);
+ownerRouter.delete('/admins/:id', umsCtrl.deleteAdmin);
+
+// Deletion approvals
+ownerRouter.get('/deletions', umsCtrl.listDeletions);
 ownerRouter.post('/products/:id/approve-delete', ctrl.approveDeletion);
 ownerRouter.post('/products/:id/reject-delete', ctrl.rejectDeletion);
