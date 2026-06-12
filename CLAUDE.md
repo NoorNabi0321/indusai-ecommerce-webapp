@@ -332,14 +332,35 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 7 — Admin Panel
-CURRENT SUBPHASE: 7.5 — Admin Notifications & Settings
+CURRENT PHASE: Phase 7 — Admin Panel — COMPLETE
+CURRENT SUBPHASE: 7.6 — AI Chatbot Widget (deferred to Phase 9; needs OpenAI)
 
 Phase 7 Progress:
   7.1 Admin Dashboard                    [x] Done (metrics+charts+recent; verified)
   7.2 Product Management UI              [x] Done (table + add/edit form; verified)
   7.3 Customer Management                [x] Done (list + profile + suspend; verified)
   7.4 Inventory Alerts                   [x] Done (alerts+inline edit+CSV; verified)
+  7.5 Admin Notifications & Settings     [x] Done (notifs+prefs+settings+activity)
+
+Notes (7.5):
+  - Backend: auth.service.login now writes a LOGIN AuditLog (staff only, with
+    req.ip) so sign-ins surface in the settings activity log; controller passes
+    { ip: req.ip }. audit.service.listActorActivity(actorId, limit<=100).
+    admin-settings.controller.getMyActivity -> GET /admin/activity (own logs).
+    Profile/password/avatar REUSE existing /users/me* from 4.5 (no new backend).
+  - Frontend: AdminNotificationsPage (reuses notification.api: feed + mark-all-
+    read; + per-category preference toggles persisted to localStorage
+    'indusai_admin_notif_prefs', filters the feed by enabled category — device-
+    local, no backend model). AdminSettingsPage (profile form + avatar + password
+    via account.api; Recent Activity table via admin-settings.api with humanized
+    action labels + LOGIN icon). lib/api/admin-settings.api.
+  - Verified live (owner): settings profile prefilled; activity table = 12 rows
+    incl. "Signed in" (LOGIN/Session/::1) + "Updated stock"; notifications feed
+    (4) + toggle Order Updates off -> feed 4->0 + LS persisted -> on -> 4
+    restored; profile save submitted clean (phone restored via API). Console
+    clean. NOTE: preview_screenshot still returned stale frames -> verified via
+    DOM eval.
+  7.6 AI Chatbot Widget (admin view)     [ ] Deferred -> Phase 9 (OpenAI dep)
 
 Notes (7.4):
   - Backend: inventory.service — alert tiers per VARIANT stock: critical<=2,
@@ -395,7 +416,6 @@ Notes (7.2):
   - Verified live: list (20 rows, stock colors), edit form populates + SAVE
     persists (basePrice 6499->6799). Image upload UI not driven in harness
     (Cloudinary upload verified in 3.2).
-  7.5 Admin Notifications & Settings     [ ] Not Started
 
 Notes (7.1):
   - dashboard.service.getAdminDashboard(role, days): metrics (ordersToday,

@@ -52,7 +52,7 @@ export const resendVerification = asyncHandler(async (req: Request, res: Respons
 // POST /api/auth/login
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const { user, accessToken, refreshToken } = await authService.login(email, password);
+  const { user, accessToken, refreshToken } = await authService.login(email, password, { ip: req.ip });
   setRefreshCookie(res, refreshToken);
   res.status(200).json({ success: true, data: { user, accessToken } });
 });

@@ -20,3 +20,14 @@ export async function writeAuditLog(entry: AuditEntry): Promise<void> {
     logger.error('Failed to write audit log:', error);
   }
 }
+
+/** Recent activity for a single actor (their own settings/activity view). */
+export async function listActorActivity(actorId: string, limit = 20) {
+  const logs = await prisma.auditLog.findMany({
+    where: { actorId },
+    orderBy: { createdAt: 'desc' },
+    take: Math.min(limit, 100),
+    select: { id: true, action: true, target: true, targetId: true, ipAddress: true, createdAt: true },
+  });
+  return logs;
+}

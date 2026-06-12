@@ -10,6 +10,7 @@ import {
 } from '../utils/jwt';
 import { createOTPRecord, verifyOTPRecord } from '../utils/otp';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
+import { writeAuditLog } from './audit.service';
 
 export type SafeUser = Omit<User, 'password'>;
 
@@ -105,6 +106,7 @@ export async function resendVerification(userId: string): Promise<void> {
 export async function login(
   email: string,
   password: string,
+  meta?: { ip?: string },
 ): Promise<{ user: SafeUser } & AuthTokens> {
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
   if (!user) {
@@ -127,6 +129,18 @@ export async function login(
   }
 
   const tokens = await issueTokens(user);
+
+  // Record staff sign-ins so they surface in the admin settings activity log.
+  if (user.role === 'ADMINISTRATOR' || user.role === 'OWNER') {
+    await writeAuditLog({
+      actorId: user.id,
+      actorRole: user.role,
+      action: 'LOGIN',
+      target: 'Session',
+      ipAddress: meta?.ip,
+    });
+  }
+
   return { user: sanitize(user), ...tokens };
 }
 

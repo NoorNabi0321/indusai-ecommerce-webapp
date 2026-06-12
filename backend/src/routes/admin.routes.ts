@@ -16,6 +16,7 @@ import * as ctrl from '../controllers/admin-product.controller';
 import * as orderCtrl from '../controllers/admin-order.controller';
 import * as customerCtrl from '../controllers/customer.controller';
 import * as inventoryCtrl from '../controllers/inventory.controller';
+import * as settingsCtrl from '../controllers/admin-settings.controller';
 import { adminDashboard } from '../controllers/dashboard.controller';
 
 export const adminRouter = Router();
@@ -25,6 +26,9 @@ adminRouter.use(authenticate, requireRole('ADMINISTRATOR', 'OWNER'));
 
 // Dashboard
 adminRouter.get('/dashboard', adminDashboard);
+
+// Signed-in staff activity (settings page)
+adminRouter.get('/activity', settingsCtrl.getMyActivity);
 
 // Orders
 adminRouter.get('/orders', orderCtrl.listAllOrders);

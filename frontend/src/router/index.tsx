@@ -28,6 +28,8 @@ import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
 import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
 import AdminCustomerDetailPage from '@/pages/admin/AdminCustomerDetailPage';
 import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
+import AdminNotificationsPage from '@/pages/admin/AdminNotificationsPage';
+import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
@@ -128,8 +130,8 @@ const routes: RouteObject[] = [
           { path: 'customers/:customerId', element: <AdminCustomerDetailPage /> },
           { path: 'inventory', element: <AdminInventoryPage /> },
           { path: 'reports', element: ph('AD-08', 'Reports', 'Phase 12') },
-          { path: 'notifications', element: ph('AD-10', 'Notifications', 'Phase 7.5') },
-          { path: 'settings', element: ph('AD-11', 'Account Settings', 'Phase 7.5') },
+          { path: 'notifications', element: <AdminNotificationsPage /> },
+          { path: 'settings', element: <AdminSettingsPage /> },
           { path: '403', element: ph('AD-13', 'Access Restricted', 'Phase 7') },
         ],
       },

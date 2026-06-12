@@ -109,6 +109,15 @@ Create/variant body:
 | GET | `/admin/customers/:id` | – | Full profile: addresses, order history (summaries), and `stats` (totalOrders/totalSpent). 404 for non-customers. |
 | PATCH | `/admin/customers/:id/status` | `{ isActive }` | Activate / suspend. Suspending revokes all refresh tokens (forces logout). Audit `CUSTOMER_SUSPEND` / `CUSTOMER_ACTIVATE`. |
 
+## Admin Activity — `/api/admin/activity` (Administrator or Owner)
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/admin/activity` | The signed-in staff member's own recent `AuditLog` entries (incl. `LOGIN`). Query: `limit` (≤100). Used by the settings activity log. |
+
+Staff sign-ins now write a `LOGIN` audit entry (with IP) on successful login.
+Profile/password/avatar reuse `/users/me`, `/users/me/password`, `/users/me/avatar` (see Account).
+
 ## Admin Inventory — `/api/admin/inventory` (Administrator or Owner)
 
 Stock alert tiers (per variant): **critical** ≤ 2, **low** ≤ 5, **moderate** ≤ 10, else healthy.
