@@ -101,6 +101,14 @@ Create/variant body:
   "isFeatured"?,"isActive"?, "variants":[{ "size"?,"color"?,"sku"?,"stock","price"? }] }
 ```
 
+## Admin Customers — `/api/admin/customers` (Administrator or Owner)
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| GET | `/admin/customers` | – | Lists CUSTOMER users. Query: `search` (name/email), `status` (`active`\|`suspended`), `page`, `limit`. Each row has `orderCount` + `totalSpent`. |
+| GET | `/admin/customers/:id` | – | Full profile: addresses, order history (summaries), and `stats` (totalOrders/totalSpent). 404 for non-customers. |
+| PATCH | `/admin/customers/:id/status` | `{ isActive }` | Activate / suspend. Suspending revokes all refresh tokens (forces logout). Audit `CUSTOMER_SUSPEND` / `CUSTOMER_ACTIVATE`. |
+
 ## Owner Products — `/api/owner` (Owner only)
 
 | Method | Path | Notes |

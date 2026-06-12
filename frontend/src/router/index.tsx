@@ -25,6 +25,8 @@ import AdminProductsPage from '@/pages/admin/AdminProductsPage';
 import AdminProductFormPage from '@/pages/admin/AdminProductFormPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage';
+import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
+import AdminCustomerDetailPage from '@/pages/admin/AdminCustomerDetailPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
@@ -121,8 +123,8 @@ const routes: RouteObject[] = [
           { path: 'products/:id/edit', element: <AdminProductFormPage /> },
           { path: 'orders', element: <AdminOrdersPage /> },
           { path: 'orders/:orderId', element: <AdminOrderDetailPage /> },
-          { path: 'customers', element: ph('AD-06', 'Customer Management', 'Phase 7.3') },
-          { path: 'customers/:customerId', element: ph('AD-07', 'Customer Profile', 'Phase 7.3') },
+          { path: 'customers', element: <AdminCustomersPage /> },
+          { path: 'customers/:customerId', element: <AdminCustomerDetailPage /> },
           { path: 'inventory', element: ph('AD-09', 'Inventory Alerts', 'Phase 7.4') },
           { path: 'reports', element: ph('AD-08', 'Reports', 'Phase 12') },
           { path: 'notifications', element: ph('AD-10', 'Notifications', 'Phase 7.5') },

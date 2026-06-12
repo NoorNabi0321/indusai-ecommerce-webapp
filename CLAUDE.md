@@ -333,12 +333,31 @@ Track current phase here. Update as each phase completes.
 
 ```
 CURRENT PHASE: Phase 7 — Admin Panel
-CURRENT SUBPHASE: 7.3 — Customer Management
+CURRENT SUBPHASE: 7.4 — Inventory Alerts
 
 Phase 7 Progress:
   7.1 Admin Dashboard                    [x] Done (metrics+charts+recent; verified)
   7.2 Product Management UI              [x] Done (table + add/edit form; verified)
-  7.3 Customer Management                [ ] Next
+  7.3 Customer Management                [x] Done (list + profile + suspend; verified)
+
+Notes (7.3):
+  - Backend: customer.service (listCustomers: search name/email + status
+    active|suspended + pagination; each row gets orderCount + totalSpent via
+    order.groupBy _sum.total). getCustomerProfile (addresses + order summaries +
+    stats; 404 for non-CUSTOMER). setCustomerStatus (toggles isActive; SUSPEND
+    deletes all refreshTokens => forced logout; audit CUSTOMER_SUSPEND/ACTIVATE).
+  - Routes: GET /admin/customers, GET /admin/customers/:id, PATCH
+    /admin/customers/:id/status ({ isActive }). customer.controller +
+    customer.validation.
+  - Frontend: lib/api/customer.api; AdminCustomersPage (status tabs + search +
+    table: avatar initials, orders, total spent, status), AdminCustomerDetailPage
+    (header card, order history table -> /admin/orders/:id, stats, suspend/
+    reactivate action, addresses). Customers nav link already in ADMIN/OWNER_NAV.
+  - Address model fields are street/city/province/postalCode/fullName/phone
+    (NOT line1/state/country) — typed CustomerAddress accordingly.
+  - Verified live (owner): list shows seeded customer; detail renders; SUSPEND
+    -> badge Suspended + button flips, REACTIVATE -> back to Active (cache
+    invalidated both ways). Console clean.
 
 Notes (7.2):
   - Backend: GET /admin/products (listAdminProducts: search/category/status

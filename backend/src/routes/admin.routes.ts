@@ -10,8 +10,10 @@ import {
   requestDeleteSchema,
 } from '../validation/admin-product.validation';
 import { updateOrderStatusSchema } from '../validation/order.validation';
+import { setCustomerStatusSchema } from '../validation/customer.validation';
 import * as ctrl from '../controllers/admin-product.controller';
 import * as orderCtrl from '../controllers/admin-order.controller';
+import * as customerCtrl from '../controllers/customer.controller';
 import { adminDashboard } from '../controllers/dashboard.controller';
 
 export const adminRouter = Router();
@@ -25,6 +27,11 @@ adminRouter.get('/dashboard', adminDashboard);
 // Orders
 adminRouter.get('/orders', orderCtrl.listAllOrders);
 adminRouter.patch('/orders/:id/status', validate({ body: updateOrderStatusSchema }), orderCtrl.updateOrderStatus);
+
+// Customers
+adminRouter.get('/customers', customerCtrl.listCustomers);
+adminRouter.get('/customers/:id', customerCtrl.getCustomer);
+adminRouter.patch('/customers/:id/status', validate({ body: setCustomerStatusSchema }), customerCtrl.setCustomerStatus);
 
 adminRouter.get('/products', ctrl.listProducts);
 adminRouter.get('/products/:id', ctrl.getProduct);
