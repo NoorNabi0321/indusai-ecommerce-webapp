@@ -68,12 +68,18 @@ export async function registerCustomer(input: RegisterInput): Promise<SafeUser> 
       phone: input.phone,
       password: await hashPassword(input.password),
       role: 'CUSTOMER',
-      isVerified: false,
+      // TEMPORARY: email verification is disabled while running on the Resend
+      // sandbox (which can't deliver OTPs to arbitrary addresses). New accounts
+      // are created pre-verified so the user can log in immediately.
+      // To re-enable OTP: set this back to `false` and restore the two lines
+      // below (createOTPRecord + sendVerificationEmail), and point RegisterPage
+      // back to '/auth/verify-otp'.
+      isVerified: true,
     },
   });
 
-  const otp = await createOTPRecord(user.id, 'EMAIL_VERIFY');
-  await sendVerificationEmail(user.email, user.name, otp);
+  // const otp = await createOTPRecord(user.id, 'EMAIL_VERIFY');
+  // await sendVerificationEmail(user.email, user.name, otp);
 
   return sanitize(user);
 }

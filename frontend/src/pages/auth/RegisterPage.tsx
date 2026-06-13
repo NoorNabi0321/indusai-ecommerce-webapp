@@ -51,14 +51,17 @@ export default function RegisterPage() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const user = await registerUser({
+      await registerUser({
         name: values.name,
         email: values.email,
         phone: values.phone,
         password: values.password,
       });
-      toast.success('Account created! Check your email for the verification code.');
-      navigate('/auth/verify-otp', { state: { userId: user.id, email: user.email } });
+      // TEMPORARY: email OTP verification is disabled (Resend sandbox can't
+      // deliver to arbitrary addresses). Accounts are created ready to use, so
+      // we send the user straight to the sign-in page.
+      toast.success('Account created! Please sign in.');
+      navigate('/auth/login', { state: { email: values.email } });
     } catch (error) {
       toast.error(getApiError(error).message);
     }

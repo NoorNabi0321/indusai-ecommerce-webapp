@@ -94,6 +94,37 @@ async function main(): Promise<void> {
   });
   console.log(`  ✓ Owner account: ${owner.email}`);
 
+  // ── Demo Administrator + Customer accounts (dev login convenience) ──
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@indusai.pk' },
+    update: { isActive: true, isVerified: true },
+    create: {
+      email: 'admin@indusai.pk',
+      name: 'IndusAI Admin',
+      phone: '+923004445566',
+      password: await bcrypt.hash('Admin@IndusAI2026', 12),
+      role: 'ADMINISTRATOR',
+      isVerified: true,
+      isActive: true,
+    },
+  });
+  console.log(`  ✓ Admin account: ${admin.email}`);
+
+  const customer = await prisma.user.upsert({
+    where: { email: 'customer@indusai.pk' },
+    update: { isActive: true, isVerified: true },
+    create: {
+      email: 'customer@indusai.pk',
+      name: 'Demo Customer',
+      phone: '+923007778899',
+      password: await bcrypt.hash('Customer@IndusAI2026', 12),
+      role: 'CUSTOMER',
+      isVerified: true,
+      isActive: true,
+    },
+  });
+  console.log(`  ✓ Customer account: ${customer.email}`);
+
   // ── Categories + products ──
   let productCount = 0;
   let variantCount = 0;
