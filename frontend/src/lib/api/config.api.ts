@@ -11,6 +11,8 @@ export interface SystemConfig {
   stripeEnabled: boolean;
   jazzcashEnabled: boolean;
   easypaisaEnabled: boolean;
+  codFee: number;
+  codMinOrder: number;
   paymentMode: 'sandbox' | 'live';
   updatedAt: string;
 }
@@ -23,6 +25,8 @@ export interface PublicConfig {
   maintenanceMessage: string;
   paymentMode: 'sandbox' | 'live';
   payments: { cod: boolean; stripe: boolean; jazzcash: boolean; easypaisa: boolean };
+  codFee: number;
+  codMinOrder: number;
 }
 
 export async function getOwnerConfig(): Promise<SystemConfig> {

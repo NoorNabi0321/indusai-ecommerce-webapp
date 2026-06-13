@@ -11,6 +11,7 @@ import { logger } from './utils/logger';
 import { AppError } from './utils/AppError';
 import { errorHandler } from './middleware/errorHandler';
 import { apiRouter } from './routes';
+import { stripeWebhook } from './controllers/payment.controller';
 
 /** Build and configure the Express application (no listening — see server.ts). */
 export function createApp(): Application {
@@ -28,6 +29,11 @@ export function createApp(): Application {
     }),
   );
   app.use(compression());
+
+  // Stripe webhook needs the raw body for signature verification — must be
+  // registered BEFORE the JSON body parser.
+  app.post('/api/payments/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(cookieParser());

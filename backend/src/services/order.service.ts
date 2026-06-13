@@ -5,6 +5,7 @@ import { AppError } from '../utils/AppError';
 import { sendOrderConfirmationEmail } from '../utils/email';
 import { notifyUser, notifyRole } from './notification.service';
 import { writeAuditLog } from './audit.service';
+import { getConfig } from './config.service';
 import { logger } from '../utils/logger';
 import type { CreateOrderInput } from '../validation/order.validation';
 
@@ -52,6 +53,7 @@ function mapOrder(order: OrderWithRelations, isAdmin = false) {
     subtotal: Number(order.subtotal),
     shippingCost: Number(order.shippingCost),
     discount: Number(order.discount),
+    codFee: Number(order.codFee),
     total: Number(order.total),
     notes: order.notes,
     trackingNumber: order.trackingNumber,
@@ -82,6 +84,19 @@ function mapOrder(order: OrderWithRelations, isAdmin = false) {
 
 /** Place an order from the user's cart (atomic: validate stock, deduct, clear cart). */
 export async function createOrder(userId: string, input: CreateOrderInput) {
+  const config = await getConfig();
+
+  // Gate the chosen payment method on the Owner's settings.
+  const methodEnabled: Record<string, boolean> = {
+    COD: config.codEnabled,
+    STRIPE: config.stripeEnabled,
+    JAZZCASH: config.jazzcashEnabled,
+    EASYPAISA: config.easypaisaEnabled,
+  };
+  if (!methodEnabled[input.paymentMethod]) {
+    throw AppError.badRequest('That payment method is currently unavailable.');
+  }
+
   const orderId = await prisma.$transaction(async (tx) => {
     const cartItems = await tx.cartItem.findMany({
       where: { userId },
@@ -118,7 +133,19 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     }
 
     const shippingCost = shippingFor(subtotal, input.deliveryType);
-    const total = subtotal + shippingCost;
+
+    // Cash on Delivery: enforce the configurable minimum and add the COD surcharge.
+    let codFee = 0;
+    if (input.paymentMethod === 'COD') {
+      if (config.codMinOrder > 0 && subtotal < config.codMinOrder) {
+        throw AppError.badRequest(
+          `Cash on Delivery requires a minimum order of Rs ${config.codMinOrder.toLocaleString()}.`,
+        );
+      }
+      codFee = config.codFee;
+    }
+
+    const total = subtotal + shippingCost + codFee;
 
     // Unique order number (retry on the rare collision).
     let orderNumber = genOrderNumber();
@@ -134,6 +161,7 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         subtotal,
         shippingCost,
         discount: 0,
+        codFee,
         total,
         addressId: input.addressId,
         notes: input.notes ?? null,

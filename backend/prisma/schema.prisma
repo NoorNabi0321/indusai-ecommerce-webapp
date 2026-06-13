@@ -129,6 +129,7 @@ model Order {
   subtotal     Decimal     @db.Decimal(10, 2)
   shippingCost Decimal     @default(0) @db.Decimal(10, 2)
   discount     Decimal     @default(0) @db.Decimal(10, 2)
+  codFee       Decimal     @default(0) @db.Decimal(10, 2)
   total        Decimal     @db.Decimal(10, 2)
   addressId      String
   notes          String?
@@ -433,6 +434,8 @@ model SystemConfig {
   stripeEnabled      Boolean  @default(true)
   jazzcashEnabled    Boolean  @default(true)
   easypaisaEnabled   Boolean  @default(true)
+  codFee             Int      @default(0) // flat surcharge added to COD orders (PKR)
+  codMinOrder        Int      @default(0) // minimum subtotal (PKR) for COD to be offered
   paymentMode        String   @default("sandbox") // sandbox | live
   updatedAt          DateTime @updatedAt
 }

@@ -169,7 +169,17 @@ The schema has no cost-of-goods field, so profit/margin is intentionally not com
 
 | Method | Path | Notes |
 |--------|------|-------|
-| GET | `/config/public` | Public-safe config: store name, maintenance mode + message, payment mode, enabled payment methods. Drives the storefront maintenance banner + checkout options. |
+| GET | `/config/public` | Public-safe config: store name, maintenance mode + message, payment mode, enabled payment methods, plus `codFee` + `codMinOrder`. Drives the storefront maintenance banner + checkout options. |
+
+## Payments — `/api/payments` (Phase 10)
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| POST | `/payments/stripe/create-intent` | user | `{ orderId }` — creates/reuses a Stripe PaymentIntent for a STRIPE order (amount from the server-side total, PKR). Returns `clientSecret`. |
+| POST | `/payments/stripe/confirm` | user | `{ orderId }` — re-fetches the PaymentIntent from Stripe; on `succeeded` marks Payment `PAID` + Order `PROCESSING` (works without webhooks locally). |
+| POST | `/payments/stripe/webhook` | public (raw body) | Verifies the Stripe signature (`STRIPE_WEBHOOK_SECRET`) and handles `payment_intent.succeeded` / `payment_intent.payment_failed`. Mounted with `express.raw` before the JSON parser. |
+
+**COD:** `createOrder` reads SystemConfig — rejects disabled methods, enforces `codMinOrder`, and adds `codFee` to the order total (stored on `Order.codFee`). Admin marking an order `DELIVERED` flips its COD payment to `PAID` (Phase 6.2).
 
 ## Two-Factor Authentication (TOTP)
 

@@ -40,6 +40,8 @@ export default function OwnerSystemConfigPage() {
   const [storeName, setStoreName] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [maintMsg, setMaintMsg] = useState('');
+  const [codFee, setCodFee] = useState('0');
+  const [codMin, setCodMin] = useState('0');
 
   useEffect(() => {
     document.title = `System Configuration · ${APP_NAME}`;
@@ -50,6 +52,8 @@ export default function OwnerSystemConfigPage() {
       setStoreName(config.storeName);
       setSupportEmail(config.supportEmail);
       setMaintMsg(config.maintenanceMessage);
+      setCodFee(String(config.codFee));
+      setCodMin(String(config.codMinOrder));
     }
   }, [config]);
 
@@ -135,6 +139,29 @@ export default function OwnerSystemConfigPage() {
             </li>
           ))}
         </ul>
+
+        {/* COD economics */}
+        <div className="mt-4 grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-secondary-foreground">COD cash-handling fee (PKR)</label>
+            <input type="number" min={0} value={codFee} onChange={(e) => setCodFee(e.target.value)} className="input" />
+            <p className="mt-1 text-xs text-muted-foreground">Flat surcharge added to Cash-on-Delivery orders.</p>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-secondary-foreground">COD minimum order (PKR)</label>
+            <input type="number" min={0} value={codMin} onChange={(e) => setCodMin(e.target.value)} className="input" />
+            <p className="mt-1 text-xs text-muted-foreground">COD is hidden below this subtotal (0 = no minimum).</p>
+          </div>
+          <div className="sm:col-span-2">
+            <Button
+              variant="outline"
+              onClick={() => mut.mutate({ codFee: Number(codFee) || 0, codMinOrder: Number(codMin) || 0 })}
+              disabled={mut.isPending || (Number(codFee) === config.codFee && Number(codMin) === config.codMinOrder)}
+            >
+              <Save className="size-4" /> Save COD settings
+            </Button>
+          </div>
+        </div>
       </section>
 
       {/* Maintenance */}

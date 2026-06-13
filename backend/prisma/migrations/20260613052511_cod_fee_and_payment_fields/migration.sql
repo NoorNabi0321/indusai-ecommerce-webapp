@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN     "codFee" DECIMAL(10,2) NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "SystemConfig" ADD COLUMN     "codFee" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "codMinOrder" INTEGER NOT NULL DEFAULT 0;

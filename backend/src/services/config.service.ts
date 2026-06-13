@@ -28,6 +28,8 @@ export interface ConfigPatch {
   stripeEnabled?: boolean;
   jazzcashEnabled?: boolean;
   easypaisaEnabled?: boolean;
+  codFee?: number;
+  codMinOrder?: number;
   paymentMode?: 'sandbox' | 'live';
 }
 
@@ -61,5 +63,7 @@ export async function getPublicConfig() {
       jazzcash: c.jazzcashEnabled,
       easypaisa: c.easypaisaEnabled,
     },
+    codFee: c.codFee,
+    codMinOrder: c.codMinOrder,
   };
 }

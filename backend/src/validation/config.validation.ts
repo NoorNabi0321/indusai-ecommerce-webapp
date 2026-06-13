@@ -10,6 +10,8 @@ export const updateConfigSchema = z
     stripeEnabled: z.boolean(),
     jazzcashEnabled: z.boolean(),
     easypaisaEnabled: z.boolean(),
+    codFee: z.coerce.number().int().min(0).max(100000),
+    codMinOrder: z.coerce.number().int().min(0).max(10000000),
     paymentMode: z.enum(['sandbox', 'live']),
   })
   .partial()

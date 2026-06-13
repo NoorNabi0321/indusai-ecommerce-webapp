@@ -14,6 +14,7 @@ import { notificationRouter } from './notification.routes';
 import { orderRouter } from './order.routes';
 import { returnRouter } from './return.routes';
 import { configRouter } from './config.routes';
+import { paymentRouter } from './payment.routes';
 
 /**
  * Root API router, mounted at `/api`. Feature routers are added here as their
@@ -36,3 +37,4 @@ apiRouter.use('/notifications', notificationRouter);
 apiRouter.use('/orders', orderRouter);
 apiRouter.use('/returns', returnRouter);
 apiRouter.use('/config', configRouter);
+apiRouter.use('/payments', paymentRouter);

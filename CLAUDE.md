@@ -332,8 +332,54 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 8 — Owner Panel — COMPLETE
-CURRENT SUBPHASE: Phase 9 — AI Features (next; needs OpenAI key)
+CURRENT PHASE: Phase 10 — Payments (10.1 + 10.4 done; 10.2/10.3 need wallet creds)
+CURRENT SUBPHASE: 10.2 JazzCash / 10.3 Easypaisa (BLOCKED on sandbox credentials)
+
+Phase 10 Progress:
+  10.1 Stripe Integration   [x] Done (card pay end-to-end in PKR; verified)
+  10.2 JazzCash Integration [ ] Blocked — needs JazzCash sandbox merchant creds
+  10.3 Easypaisa Integration[ ] Blocked — needs Easypaisa sandbox creds (2–5 day lead)
+  10.4 Cash on Delivery     [x] Done (config fee + minimum + gating; verified)
+
+Notes (10.1 + 10.4):
+  - MIGRATION 20260613052511_cod_fee_and_payment_fields: SystemConfig.codFee Int
+    + codMinOrder Int; Order.codFee Decimal. (2FA migration was 20260613044344.)
+  - STRIPE (test keys already in .env; VITE_STRIPE_PUBLISHABLE_KEY in
+    frontend/.env). payment.service: createPaymentIntent (amount from SERVER-side
+    order.total, currency PKR=2-decimal so paisa=total*100; metadata.orderId;
+    automatic_payment_methods allow_redirects:never; reuses an existing PI).
+    confirmPayment (re-retrieves PI from Stripe -> markOrderPaid: Payment PAID +
+    Order PROCESSING + notify; idempotent) — this is the RELIABLE LOCAL PATH since
+    webhooks can't reach localhost. handleWebhookEvent (constructEvent w/
+    STRIPE_WEBHOOK_SECRET; payment_intent.succeeded/payment_failed) = production
+    path. Routes: POST /payments/stripe/create-intent|confirm (auth);
+    POST /payments/stripe/webhook is mounted in app.ts with express.raw BEFORE
+    express.json (raw body needed for signature). STRIPE_WEBHOOK_SECRET is empty
+    locally -> webhook returns 400 until a `stripe listen` secret is set; the
+    confirm endpoint covers local dev.
+  - Frontend: lib/stripe (loadStripe from VITE key), lib/api/payment.api.
+    CheckoutPage WRAPPED in <Elements>; CardElement now lives on the REVIEW step
+    (stays mounted at confirm time) w/ dark styling + 4242 test hint. placeOrder:
+    STRIPE -> createOrder -> createStripeIntent -> stripe.confirmCardPayment(card)
+    -> confirmStripePayment(server verify) -> confirmation. COD/others unchanged.
+  - COD (10.4): order.service.createOrder reads SystemConfig — blocks disabled
+    methods, enforces codMinOrder (400), adds codFee to total, stores Order.codFee
+    (mapOrder returns it). getPublicConfig exposes codFee+codMinOrder; CheckoutPage
+    shows the fee row + min-order warning + disables Place Order below min.
+    OwnerSystemConfigPage gained COD fee + minimum inputs. Admin marking DELIVERED
+    already flips COD payment to PAID (6.2) — no new admin action needed.
+  - Verified live (owner-as-customer): checkout review renders the REAL Stripe
+    CardElement iframe (gold card icon + Link Autofill) + test hint, Place Order
+    Rs 6,799. Backend E2E via pm_card_visa: order -> intent (PKR 679900 paisa) ->
+    PI succeeded -> confirm endpoint PAID -> order PROCESSING + payment PAID. COD:
+    below-min 6799<10000 -> 400 w/ message; fee 150/min 0 -> order codFee 150,
+    total 6949; public config reflects fee/min. ALL TEST ORDERS DELETED, stock
+    restored (+2), config reset to 0/0, cart cleared. Console clean.
+  - NOTE: Stripe order-first flow means a failed card payment leaves a PENDING
+    order (retry would create a new order). Acceptable for now; a "retry payment
+    on existing order" UX is a future enhancement.
+
+Phase 8 — COMPLETE (Owner Panel). Phase 9 (AI) deferred — needs OpenAI/Gemini key.
 
 Phase 8 Progress:
   8.1 Owner Dashboard & Financial Stats  [x] Done (8 cards+charts+financials; verified)

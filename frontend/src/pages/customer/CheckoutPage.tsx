@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   MapPin, Plus, CreditCard, Wallet, Banknote, Truck, Zap, Lock, Pencil,
 } from 'lucide-react';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { cn, formatPrice } from '@/lib/utils';
 import { APP_NAME } from '@/lib/constants';
 import type { PaymentMethod } from '@/types/order.types';
@@ -13,6 +14,8 @@ import { useCartStore } from '@/stores/cartStore';
 import { getAddresses } from '@/lib/api/account.api';
 import { getPublicConfig } from '@/lib/api/config.api';
 import { createOrder } from '@/lib/api/order.api';
+import { createStripeIntent, confirmStripePayment } from '@/lib/api/payment.api';
+import { stripePromise } from '@/lib/stripe';
 import { computeShipping } from '@/components/cart/OrderSummary';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
 import { AddressForm } from '@/components/account/AddressForm';
@@ -22,6 +25,18 @@ import { Button } from '@/components/ui/button';
 
 const STEPS = ['Delivery', 'Payment', 'Review'];
 const EXPRESS_FEE = 500;
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      color: '#ffffff',
+      fontSize: '15px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      '::placeholder': { color: '#6E6D69' },
+      iconColor: '#E4A93A',
+    },
+    invalid: { color: '#E74C3C', iconColor: '#E74C3C' },
+  },
+} as const;
 const METHOD_CONFIG_KEY: Record<PaymentMethod, 'cod' | 'stripe' | 'jazzcash' | 'easypaisa'> = {
   COD: 'cod', STRIPE: 'stripe', JAZZCASH: 'jazzcash', EASYPAISA: 'easypaisa',
 };
@@ -33,21 +48,32 @@ const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: typeof CreditCa
   { id: 'EASYPAISA', label: 'Easypaisa', icon: Wallet, note: 'Pay from your Easypaisa wallet.' },
 ];
 
+// Stripe Elements must wrap any component that uses useStripe()/useElements().
 export default function CheckoutPage() {
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutInner />
+    </Elements>
+  );
+}
+
+function CheckoutInner() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const clearGuest = useCartStore((s) => s.clearGuest);
   const { items, count, subtotal } = useCart();
+  const stripe = useStripe();
+  const elements = useElements();
 
   const [step, setStep] = useState(1);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [addingAddress, setAddingAddress] = useState(false);
   const [deliveryType, setDeliveryType] = useState<'standard' | 'express'>('standard');
   const [payment, setPayment] = useState<PaymentMethod>('COD');
+  const [processing, setProcessing] = useState(false);
   const { data: publicConfig } = useQuery({ queryKey: ['public-config'], queryFn: getPublicConfig, staleTime: 60_000 });
   const availableMethods = PAYMENT_METHODS.filter((m) => (publicConfig ? publicConfig.payments[METHOD_CONFIG_KEY[m.id]] : true));
   const [walletPhone, setWalletPhone] = useState('');
-  const [card, setCard] = useState({ number: '', expiry: '', cvv: '', name: '' });
   const [agree, setAgree] = useState(false);
 
   useEffect(() => {
@@ -72,7 +98,10 @@ export default function CheckoutPage() {
 
   const selectedAddress = addresses?.find((a) => a.id === selectedAddressId) ?? null;
   const deliveryFee = deliveryType === 'express' ? EXPRESS_FEE : computeShipping(subtotal);
-  const total = subtotal + deliveryFee;
+  const codFee = payment === 'COD' ? (publicConfig?.codFee ?? 0) : 0;
+  const codMinOrder = publicConfig?.codMinOrder ?? 0;
+  const belowCodMinimum = payment === 'COD' && codMinOrder > 0 && subtotal < codMinOrder;
+  const total = subtotal + deliveryFee + codFee;
 
   const orderMutation = useMutation({
     mutationFn: createOrder,
@@ -94,15 +123,54 @@ export default function CheckoutPage() {
     );
   }
 
-  function placeOrder() {
+  function finishOrder(orderId: string) {
+    clearGuest();
+    void qc.invalidateQueries({ queryKey: ['cart'] });
+    navigate(`/order-confirmation/${orderId}`, { replace: true });
+  }
+
+  async function placeOrder() {
     if (!agree) return toast.error('Please accept the terms to place your order.');
     if (!selectedAddressId) return toast.error('Please select a delivery address.');
-    orderMutation.mutate({
-      addressId: selectedAddressId,
-      deliveryType,
-      paymentMethod: payment,
-    });
+    if (belowCodMinimum) {
+      return toast.error(`Cash on Delivery requires a minimum order of ${formatPrice(codMinOrder)}.`);
+    }
+
+    // Non-card methods: create the order and head to confirmation (COD is live).
+    if (payment !== 'STRIPE') {
+      orderMutation.mutate({ addressId: selectedAddressId, deliveryType, paymentMethod: payment });
+      return;
+    }
+
+    // Card: create the order, then confirm the PaymentIntent with Stripe.
+    if (!stripe || !elements) return toast.error('Payment form is still loading — please wait.');
+    const cardEl = elements.getElement(CardElement);
+    if (!cardEl) return toast.error('Enter your card details to continue.');
+
+    setProcessing(true);
+    try {
+      const order = await createOrder({ addressId: selectedAddressId, deliveryType, paymentMethod: 'STRIPE' });
+      const { clientSecret } = await createStripeIntent(order.id);
+      const result = await stripe.confirmCardPayment(clientSecret, { payment_method: { card: cardEl } });
+      if (result.error) {
+        toast.error(result.error.message ?? 'Card payment failed.');
+        return;
+      }
+      if (result.paymentIntent?.status === 'succeeded') {
+        await confirmStripePayment(order.id); // server verifies + marks the order paid
+        toast.success('Payment successful!');
+        finishOrder(order.id);
+      } else {
+        toast.error('Payment could not be completed. Please try again.');
+      }
+    } catch (e) {
+      toast.error(getApiError(e).message);
+    } finally {
+      setProcessing(false);
+    }
   }
+
+  const busy = orderMutation.isPending || processing;
 
   return (
     <div className="container py-8">
@@ -212,24 +280,23 @@ export default function CheckoutPage() {
                 </div>
               </section>
 
-              {/* Method-specific fields (visual; real processing in Phase 10) */}
+              {/* Method-specific info */}
               {payment === 'STRIPE' && (
-                <section className="grid gap-3 rounded-xl border border-border bg-bg-surface p-4 sm:grid-cols-2">
-                  <Field label="Card Number" value={card.number} onChange={(v) => setCard({ ...card, number: v })} placeholder="4242 4242 4242 4242" className="sm:col-span-2" />
-                  <Field label="Expiry" value={card.expiry} onChange={(v) => setCard({ ...card, expiry: v })} placeholder="MM/YY" />
-                  <Field label="CVV" value={card.cvv} onChange={(v) => setCard({ ...card, cvv: v })} placeholder="123" />
-                  <Field label="Cardholder Name" value={card.name} onChange={(v) => setCard({ ...card, name: v })} placeholder="Noor Nabi" className="sm:col-span-2" />
+                <section className="rounded-xl border border-border bg-bg-surface p-4 text-sm text-muted-foreground">
+                  You'll securely enter your card details on the review step. Payments are processed by Stripe.
                 </section>
               )}
               {(payment === 'JAZZCASH' || payment === 'EASYPAISA') && (
                 <section className="rounded-xl border border-border bg-bg-surface p-4">
                   <Field label="Mobile Account Number" value={walletPhone} onChange={setWalletPhone} placeholder="+92 300 0000000" />
-                  <p className="mt-2 text-xs text-muted-foreground">You'll confirm the payment via an OTP at the next step.</p>
+                  <p className="mt-2 text-xs text-muted-foreground">Wallet payments are coming soon — choose Card or Cash on Delivery to check out now.</p>
                 </section>
               )}
               {payment === 'COD' && (
                 <section className="rounded-xl border border-border bg-bg-surface p-4 text-sm text-muted-foreground">
                   Pay in cash when your order is delivered. Please keep the exact amount ready.
+                  {codFee > 0 && <span className="mt-1 block text-foreground">A {formatPrice(codFee)} cash-handling fee applies.</span>}
+                  {belowCodMinimum && <span className="mt-1 block text-error">Minimum order for COD is {formatPrice(codMinOrder)}.</span>}
                 </section>
               )}
 
@@ -275,6 +342,14 @@ export default function CheckoutPage() {
 
               <ReviewBlock title="Payment" onEdit={() => setStep(2)}>
                 <p className="text-sm text-foreground">{PAYMENT_METHODS.find((m) => m.id === payment)?.label}</p>
+                {payment === 'STRIPE' && (
+                  <div className="mt-3">
+                    <div className="rounded-lg border border-border bg-bg-base p-3">
+                      <CardElement options={CARD_ELEMENT_OPTIONS} />
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">Test card: 4242 4242 4242 4242 · any future expiry · any CVC.</p>
+                  </div>
+                )}
               </ReviewBlock>
 
               <label className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -283,9 +358,9 @@ export default function CheckoutPage() {
               </label>
 
               <div className="flex justify-between">
-                <Button size="lg" variant="outline" onClick={() => setStep(2)} disabled={orderMutation.isPending}>Back</Button>
-                <Button size="lg" onClick={placeOrder} disabled={orderMutation.isPending}>
-                  {orderMutation.isPending ? 'Placing order…' : `Place Order · ${formatPrice(total)}`}
+                <Button size="lg" variant="outline" onClick={() => setStep(2)} disabled={busy}>Back</Button>
+                <Button size="lg" onClick={placeOrder} disabled={busy || belowCodMinimum}>
+                  {busy ? (payment === 'STRIPE' ? 'Processing payment…' : 'Placing order…') : `Place Order · ${formatPrice(total)}`}
                 </Button>
               </div>
             </div>
@@ -300,6 +375,7 @@ export default function CheckoutPage() {
             <dl className="space-y-2 text-sm">
               <Row label="Subtotal" value={formatPrice(subtotal)} />
               <Row label="Delivery" value={deliveryFee === 0 ? 'Free' : formatPrice(deliveryFee)} />
+              {codFee > 0 && <Row label="Cash-handling fee" value={formatPrice(codFee)} />}
               <div className="flex justify-between border-t border-border pt-3">
                 <dt className="font-medium text-foreground">Total</dt>
                 <dd className="font-display text-lg font-semibold text-gold-base">{formatPrice(total)}</dd>
