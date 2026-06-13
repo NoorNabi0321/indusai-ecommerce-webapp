@@ -1,7 +1,9 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NavItem } from '@/lib/nav';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/lib/toast';
 import { Logo } from './Logo';
 
 interface DashboardSidebarProps {
@@ -18,6 +20,19 @@ export function DashboardSidebar({
   badge,
   onNavigate,
 }: DashboardSidebarProps) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  async function handleSignOut() {
+    onNavigate?.();
+    try {
+      await logout();
+    } finally {
+      toast.success('Signed out.');
+      navigate('/auth/login', { replace: true });
+    }
+  }
+
   return (
     <div className="flex h-full flex-col bg-bg-surface">
       <div className="flex h-16 items-center border-b border-border px-5">
@@ -36,6 +51,7 @@ export function DashboardSidebar({
         ))}
         <button
           type="button"
+          onClick={handleSignOut}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <LogOut className="size-4 shrink-0" />

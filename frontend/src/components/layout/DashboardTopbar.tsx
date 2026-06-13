@@ -1,5 +1,9 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Menu, Bell } from 'lucide-react';
+import { getUnreadCount } from '@/lib/api/notification.api';
+import { useAuthStore } from '@/stores/authStore';
+import { getInitials } from '@/lib/utils';
 
 /** Prettify the last path segment, e.g. "/admin/products" -> "Products". */
 function titleFromPath(pathname: string): string {
@@ -15,8 +19,18 @@ interface DashboardTopbarProps {
 
 export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const segments = pathname.split('/').filter(Boolean);
   const title = titleFromPath(pathname);
+
+  // Notifications live under the admin shell (Owner has access too).
+  const notificationsPath = '/admin/notifications';
+  const { data: unread = 0 } = useQuery({
+    queryKey: ['notifications', 'unread'],
+    queryFn: getUnreadCount,
+    staleTime: 30_000,
+  });
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border bg-bg-base/80 px-4 backdrop-blur-glass lg:px-6">
@@ -47,15 +61,26 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onClick={() => navigate(notificationsPath)}
           className="relative grid size-9 place-items-center rounded-md text-foreground hover:bg-accent"
           aria-label="Notifications"
         >
           <Bell className="size-5" />
-          <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-gold-base" />
+          {unread > 0 && (
+            <span className="absolute right-1 top-1 grid min-h-4 min-w-4 place-items-center rounded-full bg-gold-base px-1 text-[10px] font-bold text-bg-base">
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
         </button>
-        <div className="grid size-9 place-items-center rounded-full bg-bg-elevated text-sm font-semibold text-gold-base">
-          IA
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate(pathname.startsWith('/owner') ? '/owner/settings' : '/admin/settings')}
+          className="grid size-9 place-items-center overflow-hidden rounded-full bg-bg-elevated text-sm font-semibold text-gold-base"
+          aria-label="Account settings"
+          title={user?.name ?? 'Account'}
+        >
+          {user?.avatar ? <img src={user.avatar} alt="" className="size-full object-cover" /> : getInitials(user?.name ?? 'IA')}
+        </button>
       </div>
     </header>
   );
