@@ -37,10 +37,18 @@ async function sendEmail(params: {
 }): Promise<void> {
   const transporter = getTransporter();
 
-  if (!transporter) {
+  // ── Dev convenience ──
+  // Resend's sandbox only delivers to the account owner, so OTP/welcome emails
+  // to any other address never arrive. In development we always print the email
+  // body (which contains the code) to the server console so you can verify any
+  // account locally without real delivery. Never runs in production.
+  if (env.NODE_ENV !== 'production') {
     logger.info(
-      `📧 [console-email] To: ${params.to}\n   Subject: ${params.subject}\n   ${params.text}`,
+      `\n📧 ───── DEV EMAIL (not necessarily delivered) ─────\n   To:      ${params.to}\n   Subject: ${params.subject}\n   ${params.text}\n   ──────────────────────────────────────────────`,
     );
+  }
+
+  if (!transporter) {
     return;
   }
 
@@ -56,8 +64,15 @@ async function sendEmail(params: {
     });
     logger.info(`📧 Email sent to ${params.to}: "${params.subject}"`);
   } catch (error) {
-    logger.error(`📧 Email to ${params.to} failed ("${params.subject}"):`, error);
-    captureException(error);
+    // In the dev sandbox, recipient-restriction failures are expected — log at
+    // a lower level so they don't read as real errors. The code is above.
+    const restricted = error instanceof Error && /only send testing emails/i.test(error.message);
+    if (restricted && env.NODE_ENV !== 'production') {
+      logger.warn(`📧 Resend sandbox blocked delivery to ${params.to} (expected). Use the code logged above.`);
+    } else {
+      logger.error(`📧 Email to ${params.to} failed ("${params.subject}"):`, error);
+      captureException(error);
+    }
   }
 }
 
