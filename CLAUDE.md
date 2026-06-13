@@ -332,14 +332,56 @@ OWNER:
 Track current phase here. Update as each phase completes.
 
 ```
-CURRENT PHASE: Phase 8 — Owner Panel
-CURRENT SUBPHASE: 8.4 — System Config & Audit Log
+CURRENT PHASE: Phase 8 — Owner Panel — COMPLETE
+CURRENT SUBPHASE: Phase 9 — AI Features (next; needs OpenAI key)
 
 Phase 8 Progress:
   8.1 Owner Dashboard & Financial Stats  [x] Done (8 cards+charts+financials; verified)
   8.2 Owner Analytics & Sales Predictions[x] Done (TF.js forecast+4 charts; verified)
   8.3 User Management & Deletion Approvals[x] Done (admins CRUD + approvals; verified)
-  8.4 System Config & Audit Log          [ ] Next
+  8.4 System Config & Audit Log          [x] Done (config+audit+2FA; verified)
+
+Notes (8.4):
+  - MIGRATION 20260613044344_system_config_and_2fa: SystemConfig singleton
+    (id="singleton": storeName/supportEmail/maintenanceMode/maintenanceMessage/
+    cod|stripe|jazzcash|easypaisaEnabled/paymentMode) + User.twoFactorEnabled
+    + User.twoFactorSecret.
+  - SECURITY: sanitize() in auth.service AND user.service now strips
+    twoFactorSecret too (SafeUser = Omit<User,'password'|'twoFactorSecret'>).
+    Verified the secret never appears in any user payload.
+  - config.service: getConfig (upsert singleton), updateConfig (audit
+    CONFIG_UPDATE), getPublicConfig (storeName/maintenance/paymentMode/enabled
+    payments). Routes: GET/PUT /owner/config; PUBLIC GET /config/public.
+  - audit.service.listAuditLogs (filters actorId/action/from/to + pagination,
+    actor names) + listAuditFilters (distinct actions+actors). GET /owner/audit
+    + /owner/audit/filters.
+  - 2FA (otplib v12 — PINNED; v13 dropped the `authenticator` export). 
+    twofactor.service: setup2FA (gen secret, store, return secret+otpauthUrl),
+    enable2FA (verify code -> enable; audit 2FA_ENABLE), disable2FA (verify ->
+    clear; 2FA_DISABLE). LOGIN ENFORCED: auth.service.login throws 401
+    TWO_FACTOR_REQUIRED{userId} when enabled; verifyTwoFactorLogin completes via
+    POST /auth/2fa/verify. completeLogin() shared by both paths. Routes:
+    POST /users/me/2fa/setup|enable|disable (auth), POST /auth/2fa/verify (pub).
+  - Frontend: lib/api config.api/audit.api/twofactor.api. OwnerSystemConfigPage
+    (branding save + payment toggles [live save] + sandbox/live mode +
+    maintenance toggle w/ red UI + message). OwnerAuditLogPage (actor/action/
+    date filters, paginated table, CSV export). OwnerSettingsPage (profile/pw/
+    avatar/activity like admin + REAL 2FA: setup -> QRCodeSVG[qrcode.react]+
+    manual key -> code -> enable; disable w/ code). LoginPage handles
+    TWO_FACTOR_REQUIRED -> 6-digit step -> verifyTwoFactor. useAuth.finishSession
+    shared by login+verifyTwoFactor. MaintenanceBanner in CustomerLayout (reads
+    /config/public). CheckoutPage filters payment methods by public config.
+  - Verified live (owner): config 3 sections + 5 toggles; maintenance ON ->
+    /config/public true -> storefront gold banner renders (screenshot) -> OFF
+    restored. Audit log 30 rows (humanized actions incl LOGIN/CONFIG_UPDATE/
+    deletions), 2 actors/15 actions filters; action=CONFIG_UPDATE -> exactly 2.
+    Owner settings 4 sections; 2FA setup (secret N5..+QR+input) -> enable via UI
+    (code 293414) -> Enabled. Enforcement: login -> 401 TWO_FACTOR_REQUIRED ->
+    /auth/2fa/verify(TOTP) -> 200 OWNER token, secretLeaked=false. Disabled via
+    API -> normal login 200 again. Config back to defaults. Console clean.
+  - NOTE: 3 pre-existing HIGH npm advisories are esbuild/vite (dev-only); fixing
+    needs a breaking Vite 8 upgrade -> deferred (out of scope). qrcode.react clean.
+  - Owner /reports (OW-07) still a placeholder -> Phase 12.
 
 Notes (8.3):
   - Backend: user-management.service (OWNER). listAdmins (search/status,

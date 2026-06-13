@@ -11,6 +11,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from '../validation/auth.validation';
+import { verifyTwoFactorLoginSchema } from '../validation/twofactor.validation';
 
 export const authRouter = Router();
 
@@ -23,6 +24,7 @@ authRouter.post(
   authController.resendVerification,
 );
 authRouter.post('/login', authLimiter, validate({ body: loginSchema }), authController.login);
+authRouter.post('/2fa/verify', authLimiter, validate({ body: verifyTwoFactorLoginSchema }), authController.verifyTwoFactor);
 authRouter.post('/refresh', authController.refresh);
 authRouter.post('/logout', authController.logout);
 authRouter.post(

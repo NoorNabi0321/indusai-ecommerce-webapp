@@ -11,8 +11,9 @@ import {
 import { createOTPRecord, verifyOTPRecord } from '../utils/otp';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
 import { writeAuditLog } from './audit.service';
+import { verifyToken as verifyTotp } from './twofactor.service';
 
-export type SafeUser = Omit<User, 'password'>;
+export type SafeUser = Omit<User, 'password' | 'twoFactorSecret'>;
 
 export interface AuthTokens {
   accessToken: string;
@@ -26,9 +27,9 @@ interface RegisterInput {
   password: string;
 }
 
-/** Strip the password hash before returning a user to the client. */
+/** Strip secrets (password hash, 2FA secret) before returning a user to the client. */
 function sanitize(user: User): SafeUser {
-  const { password: _password, ...safe } = user;
+  const { password: _password, twoFactorSecret: _twoFactorSecret, ...safe } = user;
   return safe;
 }
 
@@ -128,6 +129,35 @@ export async function login(
     });
   }
 
+  // Password is correct — if 2FA is on, defer token issuance to the code step.
+  if (user.twoFactorEnabled) {
+    throw new AppError('Two-factor authentication code required.', 401, 'TWO_FACTOR_REQUIRED', {
+      userId: user.id,
+    });
+  }
+
+  return completeLogin(user, meta);
+}
+
+/** Second step of a 2FA login — validates the TOTP code, then issues tokens. */
+export async function verifyTwoFactorLogin(
+  userId: string,
+  token: string,
+  meta?: { ip?: string },
+): Promise<{ user: SafeUser } & AuthTokens> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || !user.isActive) throw AppError.unauthorized('Account unavailable.');
+  if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+    throw AppError.badRequest('Two-factor authentication is not enabled for this account.');
+  }
+  if (!verifyTotp(user.twoFactorSecret, token)) {
+    throw AppError.unauthorized('Invalid authentication code.');
+  }
+  return completeLogin(user, meta);
+}
+
+/** Issues tokens and records staff sign-ins. Shared by both login paths. */
+async function completeLogin(user: User, meta?: { ip?: string }): Promise<{ user: SafeUser } & AuthTokens> {
   const tokens = await issueTokens(user);
 
   // Record staff sign-ins so they surface in the admin settings activity log.

@@ -11,6 +11,7 @@ export interface User {
   isVerified: boolean;
   isActive: boolean;
   avatar: string | null;
+  twoFactorEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
 }

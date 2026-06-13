@@ -13,17 +13,19 @@ datasource db {
 // ─────────────────────────────── Users ───────────────────────────────
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  phone      String?  @unique
-  name       String
-  password   String
-  role       UserRole @default(CUSTOMER)
-  isVerified Boolean  @default(false)
-  isActive   Boolean  @default(true)
-  avatar     String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String   @id @default(uuid())
+  email            String   @unique
+  phone            String?  @unique
+  name             String
+  password         String
+  role             UserRole @default(CUSTOMER)
+  isVerified       Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  avatar           String?
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorSecret  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   addresses     Address[]
   orders        Order[]
@@ -416,4 +418,21 @@ model AuditLog {
 
   @@index([actorId])
   @@index([createdAt])
+}
+
+// ─────────────────────────── System configuration ────────────────────────
+// Single-row settings table (id is pinned to "singleton").
+
+model SystemConfig {
+  id                 String   @id @default("singleton")
+  storeName          String   @default("IndusAI Technology")
+  supportEmail       String   @default("support@indusai.pk")
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String   @default("We're performing scheduled maintenance and will be back shortly.")
+  codEnabled         Boolean  @default(true)
+  stripeEnabled      Boolean  @default(true)
+  jazzcashEnabled    Boolean  @default(true)
+  easypaisaEnabled   Boolean  @default(true)
+  paymentMode        String   @default("sandbox") // sandbox | live
+  updatedAt          DateTime @updatedAt
 }

@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Mail, Lock, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, ShieldCheck, KeyRound } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/lib/toast';
 import { getApiError } from '@/lib/apiError';
@@ -12,6 +12,7 @@ import { dashboardPathForRole } from '@/lib/nav';
 import { AuthFormWrapper } from '@/components/auth/AuthFormWrapper';
 import { FormInput } from '@/components/auth/FormInput';
 import { Button } from '@/components/ui/button';
+import type { User } from '@/types/user.types';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -21,9 +22,12 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, verifyTwoFactor } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [twoFactor, setTwoFactor] = useState<{ userId: string } | null>(null);
+  const [code, setCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     document.title = `Sign in · ${APP_NAME}`;
@@ -36,12 +40,16 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
+  function onAuthenticated(user: User) {
+    toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
+    const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+    navigate(from ?? dashboardPathForRole(user.role), { replace: true });
+  }
+
   const onSubmit = async (values: FormValues) => {
     try {
       const user = await login(values.email, values.password);
-      toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
-      const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
-      navigate(from ?? dashboardPathForRole(user.role), { replace: true });
+      onAuthenticated(user);
     } catch (error) {
       const err = getApiError(error);
       if (err.code === 'EMAIL_NOT_VERIFIED') {
@@ -51,9 +59,57 @@ export default function LoginPage() {
         });
         return;
       }
+      if (err.code === 'TWO_FACTOR_REQUIRED') {
+        setTwoFactor({ userId: String(err.details?.userId) });
+        return;
+      }
       toast.error(err.message);
     }
   };
+
+  async function onVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!twoFactor || code.length !== 6) return;
+    setVerifying(true);
+    try {
+      const user = await verifyTwoFactor(twoFactor.userId, code);
+      onAuthenticated(user);
+    } catch (error) {
+      toast.error(getApiError(error).message);
+      setCode('');
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  if (twoFactor) {
+    return (
+      <AuthFormWrapper
+        title="Two-factor authentication"
+        subtitle="Enter the 6-digit code from your authenticator app."
+      >
+        <form onSubmit={onVerifyCode} className="space-y-4">
+          <FormInput
+            label="Authentication Code"
+            icon={KeyRound}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            placeholder="123456"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            autoFocus
+          />
+          <Button type="submit" className="w-full" size="lg" disabled={verifying || code.length !== 6}>
+            {verifying ? 'Verifying…' : 'Verify & Sign In'}
+          </Button>
+          <button type="button" onClick={() => { setTwoFactor(null); setCode(''); }} className="w-full text-center text-xs text-muted-foreground hover:text-gold-base">
+            Back to sign in
+          </button>
+        </form>
+      </AuthFormWrapper>
+    );
+  }
 
   return (
     <AuthFormWrapper

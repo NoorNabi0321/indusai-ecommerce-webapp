@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import {
   loginApi,
+  verifyTwoFactorApi,
   logoutApi,
   registerApi,
   verifyEmailApi,
@@ -26,22 +27,14 @@ export function useAuth() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const clearAuth = useAuthStore((s) => s.clearAuth);
 
-  const login = useCallback(
-    async (email: string, password: string): Promise<User> => {
-      const { user: u, accessToken } = await loginApi(email, password);
+  // Stores the session, then merges any guest cart into the server cart.
+  const finishSession = useCallback(
+    async (u: User, accessToken: string): Promise<User> => {
       setAuth(u, accessToken);
-
-      // Merge any guest cart into the server cart, then clear it.
       const guest = useCartStore.getState().guestItems;
       if (guest.length > 0) {
         try {
-          await mergeCart(
-            guest.map((g) => ({
-              productId: g.productId,
-              variantId: g.variantId,
-              quantity: g.quantity,
-            })),
-          );
+          await mergeCart(guest.map((g) => ({ productId: g.productId, variantId: g.variantId, quantity: g.quantity })));
           useCartStore.getState().clearGuest();
         } catch {
           // Non-fatal — keep the guest cart if merge fails.
@@ -51,6 +44,23 @@ export function useAuth() {
       return u;
     },
     [setAuth],
+  );
+
+  const login = useCallback(
+    async (email: string, password: string): Promise<User> => {
+      const { user: u, accessToken } = await loginApi(email, password);
+      return finishSession(u, accessToken);
+    },
+    [finishSession],
+  );
+
+  // Completes a login that was challenged for a 2FA code.
+  const verifyTwoFactor = useCallback(
+    async (userId: string, token: string): Promise<User> => {
+      const { user: u, accessToken } = await verifyTwoFactorApi(userId, token);
+      return finishSession(u, accessToken);
+    },
+    [finishSession],
   );
 
   const register = useCallback(
@@ -93,6 +103,7 @@ export function useAuth() {
     isAuthenticated,
     isInitializing,
     login,
+    verifyTwoFactor,
     register,
     verifyEmail,
     resendVerification,

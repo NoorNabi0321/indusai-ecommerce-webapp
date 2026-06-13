@@ -3,9 +3,12 @@ import { authenticate } from '../middleware/auth.middleware';
 import { requireRole } from '../middleware/role.middleware';
 import { validate } from '../middleware/validate.middleware';
 import { createAdminSchema, setAdminStatusSchema } from '../validation/user-management.validation';
+import { updateConfigSchema } from '../validation/config.validation';
 import * as ctrl from '../controllers/admin-product.controller';
 import * as financeCtrl from '../controllers/finance.controller';
 import * as umsCtrl from '../controllers/user-management.controller';
+import * as configCtrl from '../controllers/config.controller';
+import * as auditCtrl from '../controllers/audit.controller';
 
 export const ownerRouter = Router();
 
@@ -27,3 +30,11 @@ ownerRouter.delete('/admins/:id', umsCtrl.deleteAdmin);
 ownerRouter.get('/deletions', umsCtrl.listDeletions);
 ownerRouter.post('/products/:id/approve-delete', ctrl.approveDeletion);
 ownerRouter.post('/products/:id/reject-delete', ctrl.rejectDeletion);
+
+// System configuration
+ownerRouter.get('/config', configCtrl.getConfig);
+ownerRouter.put('/config', validate({ body: updateConfigSchema }), configCtrl.updateConfig);
+
+// Audit log
+ownerRouter.get('/audit', auditCtrl.getAuditLogs);
+ownerRouter.get('/audit/filters', auditCtrl.getAuditFilters);

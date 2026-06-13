@@ -4,10 +4,10 @@ import { AppError } from '../utils/AppError';
 import { hashPassword, comparePassword } from '../utils/hash';
 import { uploadImageBuffer } from '../config/cloudinary';
 
-type SafeUser = Omit<User, 'password'>;
+type SafeUser = Omit<User, 'password' | 'twoFactorSecret'>;
 
 function sanitize(user: User): SafeUser {
-  const { password: _password, ...safe } = user;
+  const { password: _password, twoFactorSecret: _twoFactorSecret, ...safe } = user;
   return safe;
 }
 

@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { MaintenanceBanner } from './MaintenanceBanner';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 
@@ -8,6 +9,7 @@ import { CartDrawer } from '@/components/cart/CartDrawer';
 export function CustomerLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-bg-base">
+      <MaintenanceBanner />
       <Navbar />
       <main className="flex-1">
         <Outlet />

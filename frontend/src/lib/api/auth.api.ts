@@ -31,6 +31,11 @@ export async function loginApi(email: string, password: string): Promise<AuthSes
   return unwrap(data);
 }
 
+export async function verifyTwoFactorApi(userId: string, token: string): Promise<AuthSession> {
+  const { data } = await api.post<ApiSuccess<AuthSession>>('/auth/2fa/verify', { userId, token });
+  return unwrap(data);
+}
+
 export async function refreshApi(): Promise<AuthSession> {
   const { data } = await api.post<ApiSuccess<AuthSession>>('/auth/refresh', {});
   return unwrap(data);

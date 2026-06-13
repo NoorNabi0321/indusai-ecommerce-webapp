@@ -11,6 +11,7 @@ import type { Address } from '@/types/user.types';
 import { useCart } from '@/hooks/useCart';
 import { useCartStore } from '@/stores/cartStore';
 import { getAddresses } from '@/lib/api/account.api';
+import { getPublicConfig } from '@/lib/api/config.api';
 import { createOrder } from '@/lib/api/order.api';
 import { computeShipping } from '@/components/cart/OrderSummary';
 import { CheckoutStepper } from '@/components/checkout/CheckoutStepper';
@@ -21,6 +22,9 @@ import { Button } from '@/components/ui/button';
 
 const STEPS = ['Delivery', 'Payment', 'Review'];
 const EXPRESS_FEE = 500;
+const METHOD_CONFIG_KEY: Record<PaymentMethod, 'cod' | 'stripe' | 'jazzcash' | 'easypaisa'> = {
+  COD: 'cod', STRIPE: 'stripe', JAZZCASH: 'jazzcash', EASYPAISA: 'easypaisa',
+};
 
 const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: typeof CreditCard; note: string }[] = [
   { id: 'COD', label: 'Cash on Delivery', icon: Banknote, note: 'Pay with cash when your order arrives.' },
@@ -40,6 +44,8 @@ export default function CheckoutPage() {
   const [addingAddress, setAddingAddress] = useState(false);
   const [deliveryType, setDeliveryType] = useState<'standard' | 'express'>('standard');
   const [payment, setPayment] = useState<PaymentMethod>('COD');
+  const { data: publicConfig } = useQuery({ queryKey: ['public-config'], queryFn: getPublicConfig, staleTime: 60_000 });
+  const availableMethods = PAYMENT_METHODS.filter((m) => (publicConfig ? publicConfig.payments[METHOD_CONFIG_KEY[m.id]] : true));
   const [walletPhone, setWalletPhone] = useState('');
   const [card, setCard] = useState({ number: '', expiry: '', cvv: '', name: '' });
   const [agree, setAgree] = useState(false);
@@ -47,6 +53,13 @@ export default function CheckoutPage() {
   useEffect(() => {
     document.title = `Checkout · ${APP_NAME}`;
   }, []);
+
+  // If the selected method gets disabled by the Owner, fall back to an enabled one.
+  useEffect(() => {
+    if (!publicConfig) return;
+    const enabled = PAYMENT_METHODS.filter((m) => publicConfig.payments[METHOD_CONFIG_KEY[m.id]]);
+    if (!enabled.some((m) => m.id === payment) && enabled[0]) setPayment(enabled[0].id);
+  }, [publicConfig, payment]);
 
   const { data: addresses } = useQuery({ queryKey: ['addresses'], queryFn: getAddresses });
 
@@ -176,7 +189,7 @@ export default function CheckoutPage() {
               <section>
                 <h2 className="mb-3 font-display text-md font-semibold text-foreground">Payment Method</h2>
                 <div className="space-y-2">
-                  {PAYMENT_METHODS.map((m) => (
+                  {availableMethods.map((m) => (
                     <button
                       key={m.id}
                       type="button"

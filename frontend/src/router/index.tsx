@@ -35,6 +35,9 @@ import OwnerFinancialsPage from '@/pages/owner/OwnerFinancialsPage';
 import OwnerAnalyticsPage from '@/pages/owner/OwnerAnalyticsPage';
 import OwnerUserManagementPage from '@/pages/owner/OwnerUserManagementPage';
 import OwnerDeletionApprovalsPage from '@/pages/owner/OwnerDeletionApprovalsPage';
+import OwnerSystemConfigPage from '@/pages/owner/OwnerSystemConfigPage';
+import OwnerAuditLogPage from '@/pages/owner/OwnerAuditLogPage';
+import OwnerSettingsPage from '@/pages/owner/OwnerSettingsPage';
 import ReturnRequestPage from '@/pages/customer/ReturnRequestPage';
 import { AccountLayout } from '@/components/layout/AccountLayout';
 import WishlistPage from '@/pages/customer/account/WishlistPage';
@@ -157,10 +160,10 @@ const routes: RouteObject[] = [
           { path: 'analytics', element: <OwnerAnalyticsPage /> },
           { path: 'users', element: <OwnerUserManagementPage /> },
           { path: 'deletions', element: <OwnerDeletionApprovalsPage /> },
-          { path: 'config', element: ph('OW-06', 'System Configuration', 'Phase 8.4') },
+          { path: 'config', element: <OwnerSystemConfigPage /> },
           { path: 'reports', element: ph('OW-07', 'All Reports', 'Phase 12') },
-          { path: 'audit', element: ph('OW-08', 'Platform Audit Log', 'Phase 8.4') },
-          { path: 'settings', element: ph('OW-09', 'Account Settings', 'Phase 8.4') },
+          { path: 'audit', element: <OwnerAuditLogPage /> },
+          { path: 'settings', element: <OwnerSettingsPage /> },
         ],
       },
     ],

@@ -57,6 +57,14 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ success: true, data: { user, accessToken } });
 });
 
+// POST /api/auth/2fa/verify — completes a login that was challenged for 2FA
+export const verifyTwoFactor = asyncHandler(async (req: Request, res: Response) => {
+  const { userId, token } = req.body;
+  const { user, accessToken, refreshToken } = await authService.verifyTwoFactorLogin(userId, token, { ip: req.ip });
+  setRefreshCookie(res, refreshToken);
+  res.status(200).json({ success: true, data: { user, accessToken } });
+});
+
 // POST /api/auth/refresh
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
   const token = req.cookies?.[REFRESH_COOKIE] as string | undefined;

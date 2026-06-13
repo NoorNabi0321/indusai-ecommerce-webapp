@@ -156,6 +156,32 @@ The schema has no cost-of-goods field, so profit/margin is intentionally not com
 | POST | `/owner/products/:id/approve-delete` | Archives product (`isActive=false`), marks request APPROVED, notifies requester. Audit `PRODUCT_DELETE_APPROVE`. |
 | POST | `/owner/products/:id/reject-delete` | Marks request REJECTED, product stays active. Audit `PRODUCT_DELETE_REJECT`. |
 
+## Owner System Config & Audit — `/api/owner` (Owner only)
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| GET | `/owner/config` | – | Returns the singleton SystemConfig (branding, payment toggles, payment mode, maintenance). |
+| PUT | `/owner/config` | partial config | Updates any subset of settings. Audit `CONFIG_UPDATE`. |
+| GET | `/owner/audit` | – | Platform audit log. Query `actorId`, `action`, `from`, `to`, `page`, `limit` (≤100). Paginated, newest first, with actor names. |
+| GET | `/owner/audit/filters` | – | Distinct actions + actors for the filter dropdowns. |
+
+## Public Config — `/api/config`
+
+| Method | Path | Notes |
+|--------|------|-------|
+| GET | `/config/public` | Public-safe config: store name, maintenance mode + message, payment mode, enabled payment methods. Drives the storefront maintenance banner + checkout options. |
+
+## Two-Factor Authentication (TOTP)
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| POST | `/users/me/2fa/setup` | user | Generates a TOTP secret (stored, not yet active); returns `secret` + `otpauthUrl`. |
+| POST | `/users/me/2fa/enable` | user | `{ token }` — verifies a code, enables 2FA. Audit `2FA_ENABLE`. |
+| POST | `/users/me/2fa/disable` | user | `{ token }` — verifies a current code, disables 2FA + clears the secret. Audit `2FA_DISABLE`. |
+| POST | `/auth/2fa/verify` | public | `{ userId, token }` — completes a login challenged with `TWO_FACTOR_REQUIRED`. |
+
+When a 2FA-enabled user logs in, `/auth/login` returns `401 TWO_FACTOR_REQUIRED` with `{ userId }` instead of tokens; the client then calls `/auth/2fa/verify`.
+
 All admin/owner product mutations write an `AuditLog` entry (Owner-visible).
 
 ---
