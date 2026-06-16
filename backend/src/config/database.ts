@@ -20,10 +20,12 @@ if (env.NODE_ENV !== 'production') {
 
 /**
  * Verify connectivity at startup, retrying with backoff. Serverless Postgres
- * (Neon) auto-suspends when idle and can take a few seconds to cold-start, so a
- * single attempt may time out — we retry before giving up.
+ * (Neon) auto-suspends when idle, and a DEEP suspend can take 30–60s+ to
+ * cold-start — so we retry for up to ~60s before giving up (the first failed
+ * attempts are what wake the compute). Once connected, the keep-alive below
+ * holds it warm so this only matters on a cold start.
  */
-export async function connectDatabase(retries = 5, delayMs = 3000): Promise<void> {
+export async function connectDatabase(retries = 12, delayMs = 5000): Promise<void> {
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
       await prisma.$connect();
