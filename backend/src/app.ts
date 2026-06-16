@@ -22,9 +22,15 @@ export function createApp(): Application {
 
   // ── Security & parsing ──
   app.use(helmet());
+  // FRONTEND_URL may be a comma-separated list (e.g. prod domain + custom domain).
+  const allowedOrigins = env.FRONTEND_URL.split(',').map((o) => o.trim()).filter(Boolean);
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: (origin, callback) => {
+        // Allow same-origin / server-to-server (no Origin header) and any listed origin.
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(new Error(`Origin ${origin} not allowed by CORS`));
+      },
       credentials: true,
     }),
   );

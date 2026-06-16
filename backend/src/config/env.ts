@@ -21,7 +21,8 @@ const envSchema = z.object({
   // ── App (required, with sensible defaults) ──
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
-  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  // One origin, or a comma-separated list (prod domain + custom domain). Parsed in app.ts.
+  FRONTEND_URL: z.string().min(1).default('http://localhost:5173'),
 
   // ── JWT (required — server refuses to start without these) ──
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 chars'),
