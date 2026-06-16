@@ -61,3 +61,6 @@ Thumbs.db
 *.local
 .vercel
 .railway
+
+# Deployment values cheat-sheet — contains real secrets, NEVER commit.
+DEPLOY_VALUES.local.md
