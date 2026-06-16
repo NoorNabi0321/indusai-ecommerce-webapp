@@ -28,6 +28,7 @@ export async function connectDatabase(retries = 5, delayMs = 3000): Promise<void
     try {
       await prisma.$connect();
       logger.info('🗄️  Database connected.');
+      startKeepAlive();
       return;
     } catch (error) {
       if (attempt === retries) throw error;
@@ -39,8 +40,29 @@ export async function connectDatabase(retries = 5, delayMs = 3000): Promise<void
   }
 }
 
+/**
+ * Neon's free tier auto-suspends the database after ~5 minutes of inactivity,
+ * which terminates live connections (Postgres 57P01) and adds a cold-start delay
+ * to the next request. A light `SELECT 1` every 4 minutes keeps the compute warm
+ * while the server is running — eliminating those connection-termination logs and
+ * keeping demos snappy. Failures are swallowed (the pool reconnects on its own).
+ */
+let keepAliveTimer: NodeJS.Timeout | undefined;
+
+function startKeepAlive(): void {
+  if (keepAliveTimer) return;
+  keepAliveTimer = setInterval(() => {
+    void prisma.$queryRaw`SELECT 1`.catch(() => undefined);
+  }, 4 * 60_000);
+  keepAliveTimer.unref(); // don't keep the process alive just for this
+}
+
 /** Disconnect cleanly during graceful shutdown. */
 export async function disconnectDatabase(): Promise<void> {
+  if (keepAliveTimer) {
+    clearInterval(keepAliveTimer);
+    keepAliveTimer = undefined;
+  }
   await prisma.$disconnect();
   logger.info('Database disconnected.');
 }
