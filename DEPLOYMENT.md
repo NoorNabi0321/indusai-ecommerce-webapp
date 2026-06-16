@@ -1,4 +1,39 @@
-# 🚀 Go Live — Railway (API) + Vercel (Frontend)
+# 🌐 Option A — Share instantly with a tunnel (no deploy, free)
+
+Keep the app running on your PC and expose it to the internet with one URL.
+Thanks to the Vite proxy (`vite.config.ts`), the **whole app + API go through one
+port (5173)** — so you only tunnel that one port, with no CORS or cookie issues.
+
+**Always running first:** from the project root, `npm run dev` (starts API + web).
+Keep your PC awake — the link only works while these are running.
+
+### Easiest: VS Code Port Forwarding (built in, free)
+1. `npm run dev`.
+2. VS Code → **PORTS** tab (next to Terminal) → **Forward a Port** → type `5173`.
+3. Right-click the row → **Port Visibility → Public** (first time asks GitHub login).
+4. Copy the `https://…devtunnels.ms` URL and share it. Done.
+
+### Or: Cloudflare Tunnel (one command, no signup)
+1. Install once: `winget install --id Cloudflare.cloudflared` (or download `cloudflared.exe`).
+2. `npm run dev` in one terminal.
+3. In a second terminal: `cloudflared tunnel --url http://localhost:5173`
+4. It prints a `https://<random>.trycloudflare.com` URL — share it. Ctrl+C to stop.
+
+### Or: ngrok (popular; needs a free account)
+1. Sign up at ngrok.com → copy your authtoken → `ngrok config add-authtoken <token>`.
+2. `npm run dev`, then `ngrok http 5173`.
+3. Share the `https://<random>.ngrok-free.app` URL (free tier shows a one-time warning page).
+
+**Notes**
+- Only tunnel **5173**. The backend (3000) is reached automatically via the proxy.
+- Free tunnel URLs are temporary — they change each restart.
+- It's a dev server: great for demos/feedback, not for permanent public traffic
+  (use Option B below for that).
+- Login with `owner@indusai.pk` / `Owner@IndusAI2026` (or admin/customer).
+
+---
+
+# 🚀 Option B — Go Live permanently — Railway (API) + Vercel (Frontend)
 
 Follow these in order. The **actual secret values** to paste are in
 `DEPLOY_VALUES.local.md` (gitignored — open it next to this guide and copy from it).

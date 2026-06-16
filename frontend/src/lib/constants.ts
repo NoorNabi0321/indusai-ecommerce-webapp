@@ -3,8 +3,13 @@
 export const APP_NAME = 'IndusAI Technology';
 export const APP_TAGLINE = 'Shop Premium. Shop Smart.';
 
-/** Base URL for the backend API (overridable via VITE_API_URL). */
-export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+/**
+ * Base URL for the backend API (overridable via VITE_API_URL).
+ * Defaults to a relative '/api' so requests flow through the Vite dev proxy
+ * (single origin → works locally and over a tunnel). In production, set
+ * VITE_API_URL to the deployed API URL.
+ */
+export const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 /** Product categories (mirrors backend Category seed). */
 export const CATEGORIES = [
